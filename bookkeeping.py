@@ -47,11 +47,11 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
                     user_inputs['datatype'] == 'Science':
                     
                     input_value = query_header(ad, input_request['id'])
-                    user_inputs[input_request['id']] = input_value
                 else:
                     # prompt the user
                     input_value = raw_input(input_request['prompt'])
-                    user_inputs[input_request['id']] = input_value
+
+                user_inputs[input_request['id']] = input_value
                 
                 # Assume that the user has a brain.
                 # Probe only the first file in 'filerange' since all the
@@ -61,8 +61,6 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
                 # and keep it open until we're done requesting inputs
                 # (instead of opening and closing it every time).
                 if auto and filename_not_known:
-                    print 'enter auto mode'
-                    print user_inputs
                     if user_inputs.has_key('rootname') and user_inputs.has_key('filerange'):
                         # parse filerange, build filename (with rawdir path)
                         filenumbers = parse_filerange(user_inputs['filerange'])
@@ -72,10 +70,6 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
                         # open ad
                         ad = AstroData(filename)                        
                         filename_not_known = False
-                        print "ad open"
-                #elif auto and user_inputs.has_key('datatype') and \
-                #    user_inputs['datatype'] == 'Science':
-                #    input_value = query_header(ad, input_request['targetname'])                  
             else:
                 
                 # get value from header
