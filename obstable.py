@@ -152,7 +152,7 @@ class ObsRecord:
         printed to screen or sent to file.
         """
         
-        record_string = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%.1f\t%d\t%s" % \
+        record_string = "%s\t%s\t%s\t%s\t%s\t\t%s\t%s\t\t%.1f\t%d\t%s" % \
             (self.targetname,
             self.rootname,
             self.band,

@@ -8,7 +8,7 @@ class TestObsRecord:
     
     @classmethod
     def setup_class(cls):
-        TestObsRecord.asciiline = "SDSSJ000429.46-002142.8\tS20130719\tHK\tHK\tScience\tNone\t496-499\t90.0\t6\tfaint"
+        TestObsRecord.asciiline = "SDSSJ000429.46-002142.8\tS20130719\tHK\tHK\tScience\t\tNone\t496-499\t\t90.0\t6\tfaint"
         TestObsRecord.obsrecord = obstable.ObsRecord(targetname='SDSSJ000429.46-002142.8', 
                                                      rootname='S20130719', 
                                                      band='HK', grism='HK', 
@@ -52,7 +52,7 @@ class TestObsTable():
                                                      datatype='Science', applyto='None', 
                                                      filerange='496-499', exptime=90,
                                                      lnrs=6, rdmode='faint')
-        TestObsTable.asciiline = "SDSSJ000429.46-002142.8\tS20130719\tHK\tHK\tScience\tNone\t496-499\t90.0\t6\tfaint"
+        TestObsTable.asciiline = "SDSSJ000429.46-002142.8\tS20130719\tHK\tHK\tScience\t\tNone\t496-499\t\t90.0\t6\tfaint"
     
     @classmethod
     def teardown_class(cls):
