@@ -14,13 +14,16 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
     # then read it.  Otherwise, leave it empty.
     # Error handling: If the file exists but there's an read error,
     # raise, otherwise assume that you are creating a new file.
-    table = obstable.ObsTable(tablename)
+    table = obstable.ObsTable()
+    table.filename=tablename
     try:
         table.read_table()
     except IOError:
         if os.path.exists(tablename):
             print "Error reading table %s\n" % tablename
             raise
+        else:
+            print "New table will be created."
     
     # Start the prompting the user and the data for the information
     # that needs to go in the table.
@@ -37,8 +40,18 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
         # Loop through record elements
         for input_request in req_input_list:
             if (not input_request['in_hdr'] or not auto):
-                # prompt the user
-                input_value = raw_input(input_request['prompt'])
+                # if auto and this is a Science entry, get the targetname from
+                # the header.  If not Science, then you need to prompt user.
+                if auto and input_request['id'] == 'targetname' and \
+                    user_inputs.has_key('datatype') and \
+                    user_inputs['datatype'] == 'Science':
+                    
+                    input_value = query_header(ad, input_request['id'])
+                    user_inputs[input_request['id']] = input_value
+                else:
+                    # prompt the user
+                    input_value = raw_input(input_request['prompt'])
+                    user_inputs[input_request['id']] = input_value
                 
                 # Assume that the user has a brain.
                 # Probe only the first file in 'filerange' since all the
@@ -48,21 +61,26 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
                 # and keep it open until we're done requesting inputs
                 # (instead of opening and closing it every time).
                 if auto and filename_not_known:
-                    if user_inputs.has_key('root') and user_inputs.has_key('filerange'):
+                    print 'enter auto mode'
+                    print user_inputs
+                    if user_inputs.has_key('rootname') and user_inputs.has_key('filerange'):
                         # parse filerange, build filename (with rawdir path)
                         filenumbers = parse_filerange(user_inputs['filerange'])
-                        filename = "%sS%04d.fits" % (user_inputs['root'], filenumbers[0])
+                        filename = "%sS%04d.fits" % (user_inputs['rootname'], filenumbers[0])
                         filename = os.path.join(rawdir,filename)
 
                         # open ad
                         ad = AstroData(filename)                        
-                        filename_not_known = False                    
+                        filename_not_known = False
+                        print "ad open"
+                #elif auto and user_inputs.has_key('datatype') and \
+                #    user_inputs['datatype'] == 'Science':
+                #    input_value = query_header(ad, input_request['targetname'])                  
             else:
                 
                 # get value from header
                 input_value = query_header(ad, input_request['id'])
-                
-            user_inputs[input_request['id']] = input_value
+                user_inputs[input_request['id']] = input_value
         
         if auto:
             ad.close()
@@ -71,10 +89,10 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
         new_record = create_record(user_inputs)
         
         # Append to table
-        table.add_record_to_table(new_record)
+        table.add_records_to_table(new_record)
         
         # Prompt user: add another entry?
-        answer = raw_input('Add another entry (y/n)')
+        answer = raw_input('Add another entry (y/n): ')
         user_not_done = ((answer=='y') or False)
     
     # All the info is now in the ObsTable.
@@ -90,42 +108,42 @@ def mkscript():
 #--------------------
 
 def get_req_input_list():
-    # target means Science target, eg. a flat is associated
-    # to "this" science target, hence cannot be in header.
-    target_prompt = {'prompt': 'Name of target',
-                     'in_hdr': False,
-                     'id': 'targetname'}
-    root_prompt = {'prompt': 'File root name (e.g. S201202012)',
+    root_prompt = {'prompt': 'File root name (e.g. S201202012): ',
                    'in_hdr': False,
                    'id': 'rootname'}
-    filerange_prompt = {'prompt': 'filerange string (e.g. 201-205)',
+    filerange_prompt = {'prompt': 'filerange string (e.g. 201-205): ',
                         'in_hdr': False,
                         'id': 'filerange'}
-    applyto_prompt = {'prompt': 'Applies to (e.g. Science)',
-                      'in_hrd': False,
+    applyto_prompt = {'prompt': 'Applies to (e.g. Science): ',
+                      'in_hdr': False,
                       'id': 'applyto'}
-    datatype_prompt = {'prompt': 'Type of observation (e.g. Flat)',
+    datatype_prompt = {'prompt': 'Type of observation (e.g. Flat): ',
                        'in_hdr': False,
                        'id': 'datatype'}
-    band_prompt = {'prompt': 'Band',
+    # target means Science target, eg. a flat is associated
+    # to "this" science target, hence cannot be in header.
+    target_prompt = {'prompt': 'Name of science target: ',
+                     'in_hdr': False,
+                     'id': 'targetname'}
+    band_prompt = {'prompt': 'Band: ',
                    'in_hdr': True,
                    'id': 'band'}
-    grism_prompt = {'prompt': 'Grism',
+    grism_prompt = {'prompt': 'Grism: ',
                     'in_hdr': True,
                     'id': 'grism'}
-    exptime_prompt = {'prompt': 'Exposure Time',
+    exptime_prompt = {'prompt': 'Exposure Time: ',
                       'in_hdr': True,
                       'id': 'exptime'}
-    lnrs_prompt = {'prompt': 'LNRS',
+    lnrs_prompt = {'prompt': 'LNRS: ',
                    'in_hdr': True,
                    'id': 'lnrs'}
-    rdmode_prompt = {'prompt': 'Read mode (e.g. Faint, Bright)',
+    rdmode_prompt = {'prompt': 'Read mode (e.g. Faint, Bright): ',
                      'in_hdr': True,
                      'id': 'rdmode'}
-    return [root_prompt, filerange_prompt, applyto_prompt, 
-                      datatype_prompt, target_prompt, band_prompt, 
-                      grism_prompt, exptime_prompt, lnrs_prompt,
-                      rdmode_prompt]
+    return [root_prompt, filerange_prompt, 
+            applyto_prompt, datatype_prompt, target_prompt, band_prompt, 
+            grism_prompt, exptime_prompt, lnrs_prompt,
+            rdmode_prompt]
 
 def query_header(ad, requested_input):
     # warning: might not be efficient if the descriptor system is slow
@@ -152,7 +170,7 @@ def create_record(user_inputs):
     record.applyto = user_inputs['applyto']
     record.filerange = user_inputs['filerange']
     record.exptime = float(user_inputs['exptime'])
-    record.lnrs = integer(user_inputs['lnrs'])
+    record.lnrs = int(user_inputs['lnrs'])
     record.rdmode = user_inputs['rdmode']
     
     return record
