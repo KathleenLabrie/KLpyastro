@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+
+import argparse
+from bookkeeping import mktable_helper
+
+VERSION = '1.0.0'
+
+def parse_args():
+	"""
+	Parse command line arguments.
+	"""
+	#usage = '%prog [options] tablename'
+	p = argparse.ArgumentParser(description='Add to observation table.')
+	p.add_argument('tablename', type=str, nargs=1, help='Name of the output table')
+	p.add_argument('--disable-auto', dest='auto', action='store_false', help='Disable the automatic mode')
+	p.add_argument('--rawdir', dest='rawdir', action='store', default='./', help='Location of the data')
+	p.add_argument('-v', '--verbose', dest='verbose', action='store_true', default=False, help='Toggle on verbose mode')
+	p.add_argument('--debug', dest='debug', action='store_true', default=False, help='Toggle on debug mode')
+	
+	args = p.parse_args()
+	if args.debug:
+		print args
+		print args.tablename
+		print args.auto
+		print args.rawdir
+	
+	return args
+
+if __name__ == '__main__':
+	args = parse_args()
+	mktable_helper(args.tablename[0], auto=args.auto,
+				rawdir=args.rawdir)
