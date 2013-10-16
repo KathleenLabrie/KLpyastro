@@ -1,3 +1,4 @@
+import os
 import os.path
 import bookkeeping
 from nose.tools import assert_list_equal
@@ -112,3 +113,20 @@ class TestBookkeeping:
     def test_mktable_helper(self):
         pass
     
+    def test_mkdirectories(self):
+        import shutil
+        
+        program='GS-2013-Q-73'
+        targetname='SDSSJ022721.25-010445.8'
+        obsdate='20131002'
+        reduxdate='15Oct2013'
+        bands=['JH','HK']
+        expected_result = [('GS-2013-Q-73', ['raw', 'SDSSJ022721.25-010445.8'], []), ('GS-2013-Q-73/raw', [], []), ('GS-2013-Q-73/SDSSJ022721.25-010445.8', ['20131002-15Oct2013', 'sciproducts'], []), ('GS-2013-Q-73/SDSSJ022721.25-010445.8/20131002-15Oct2013', ['reduxHK', 'reduxJH'], ['README']), ('GS-2013-Q-73/SDSSJ022721.25-010445.8/20131002-15Oct2013/reduxHK', [], []), ('GS-2013-Q-73/SDSSJ022721.25-010445.8/20131002-15Oct2013/reduxJH', [], []), ('GS-2013-Q-73/SDSSJ022721.25-010445.8/sciproducts', [], [])]
+        bookkeeping.mkdirectories(program, targetname, obsdate,
+                                  reduxdate, bands)
+        result = []
+        for dirstruct in os.walk(program):
+            result.append(dirstruct)
+        shutil.rmtree(program)
+        assert_list_equal(result, expected_result)   
+        

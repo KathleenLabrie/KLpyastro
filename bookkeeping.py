@@ -1,8 +1,58 @@
 # create directory structure
 # use template and inputs on file names to create reduction scripts
 
-def mkdirectories():
+def mkdirectories(program, targetname, obsdate, reduxdate, bands):
+    # One target at a time.  Obsdate/reduxdate combination.
+    import os
+    import os.path
+    
+    rootdir = os.getcwd()
+    
+    # Program # directory
+    if not os.path.exists(program):
+        os.makedirs(program)
+    
+    #-----
+    os.chdir(program)
+
+    # Raw directory
+    if not os.path.exists('raw'):
+        os.makedirs('raw')
+    # Target directory
+    if not os.path.exists(targetname):
+        os.makedirs(targetname)
+    
+    #-----
+    os.chdir(targetname)
+    
+    # sciproducts directory
+    if not os.path.exists('sciproducts'):
+        os.makedirs('sciproducts')
+    # date directory
+    datedir = '-'.join([obsdate,reduxdate])
+    if not os.path.exists(datedir):
+        os.makedirs(datedir)
+    
+    #-----
+    os.chdir(datedir)
+    
+    # redux directories
+    for band in bands:
+        reduxdir=''.join(['redux',band])
+        if not os.path.exists(reduxdir):
+            os.makedirs(reduxdir)
+    
+    # README file
+    if not os.path.exists('README'):
+        write_README_template()
+    
+    # Possibly create and add the redux scripts once the tool
+    # has been created.
+    
+    os.chdir(rootdir)
+    
     return
+
 
 def mktable_helper(tablename, auto=True, rawdir="./"):
     import obstable
@@ -95,7 +145,7 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
     
     return
 
-def mkscript():
+def mkreduxscript():
     return
 
 
@@ -190,3 +240,13 @@ def parse_filerange(filerange):
             raise RuntimeError
     
     return filenumbers
+
+def write_README_template():
+    f = open('README', 'w')
+    f.write("Reduced with\n")
+    f.write("  reduxF2LS-BELR  [hg #:sha / github sha]\n")
+    f.write("  gemini_iraf [version]\n")
+    f.write("\n")
+    f.write("QUICKLOOK ONLY - NOT SQ or FOR SCIENCE\n")
+    f.close()
+    return
