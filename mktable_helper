@@ -9,7 +9,6 @@ def parse_args():
 	"""
 	Parse command line arguments.
 	"""
-	#usage = '%prog [options] tablename'
 	p = argparse.ArgumentParser(description='Add to observation table.')
 	p.add_argument('tablename', type=str, nargs=1, help='Name of the output table')
 	p.add_argument('--disable-auto', dest='auto', action='store_false', help='Disable the automatic mode')
