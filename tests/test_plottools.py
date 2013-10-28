@@ -1,6 +1,8 @@
 import plottools
 #from nose.tools import assert_equal
 
+#### Not clear how to test plots
+
 class TestPlot:
     
     @classmethod
