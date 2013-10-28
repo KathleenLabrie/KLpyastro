@@ -46,12 +46,15 @@ class Line:
 
 
 class Spectrum:
-    def __init__(self, hdu):
+    def __init__(self, hdu, wunit=None):
         self.counts = self.get_counts_array_from_hdu(hdu)
         self.pix = self.get_pixel_array_from_hdu(hdu)
         self.wcs = self.get_wcs_from_hdu(hdu)
         self.wlen = self.apply_wcs_to_pixels()
-        self.wunit = self.get_wunit(hdu)
+        self.wunit = wunit
+        
+        if self.wunit is None:
+            self.wunit = self.get_wunit(hdu)
     
     def get_counts_array_from_hdu(self, hdu):
         return hdu.data
@@ -62,12 +65,15 @@ class Spectrum:
     def get_wcs_from_hdu(self, hdu):
         return wcs.WCS(hdu.header.tostring())
     
+    def get_wunit(self, hdu):
+        unit_str = hdu.header['WAT1_001'].split()[2].split('=')[1]
+        if unit_str.endswith('s'):
+            unit_str = unit_str[:-1]
+        return u.Unit(unit_str)
+
     def apply_wcs_to_pixels(self):
         return self.wcs.wcs_pix2world(zip(self.pix), 0)
     
-    def get_wunit(self, hdu):
-        return u.Unit(hdu.header['WAT1_001'].split[2].split('=')[1])
-
     
 class AtmosphericTransparency:
     def __init__(self, filename, wunit='Angstrom'):
@@ -146,9 +152,10 @@ class LineList:
 
     def get_lines_from_list(self, name, redshift):
         lines = []
-        for line_data in linelist_dict(name):
+        for line_data in linelist_dict[name]:
             line = Line(restwlen=line_data[1], redshift=redshift, 
-                        name=line_data[0])        
+                        name=line_data[0]) 
+            lines.append(line)
         return lines
         
     def apply_redshift(self, redshift):   
@@ -162,6 +169,7 @@ class LineList:
 linelist_dict = {
     'quasar' : [  ('HeI', 0.5876 * u.micron),
                   ('HeI', 1.083 * u.micron),
+                  ('H_alpha', 0.6563 * u.micron),
                   ('Pa_epsilon', 0.9546 * u.micron),
                   ('Pa_delta', 1.005 * u.micron),
                   ('Pa_gamma', 1.094 * u.micron),
