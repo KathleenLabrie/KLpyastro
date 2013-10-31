@@ -142,37 +142,15 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
     # All the info is now in the ObsTable.
     # Write the ObsTable to disk and close everything, we're done.
     table.write_table()
+    table.pretty_table()
     
     return
 
 def mkreduxscript(tablename, targetname, band, shorttarget,
                   rootname):
-#    import obstable
-#    import re
-#    tag = re.compile('<.+>')
-#    
-#    # Read the Obs table
-#    obstable = obstable.ObsTable('GS-2013B-Q-73.dat')
-#    
-#    # Select records matching targetname and rootname
-#    
-#    template = open('templateF2.cl', 'r')
-#    output = open('redux.cl', 'w')
-#    for line in template:
-#        tags_in_line = tag.findall(line)
-#        # replace each tag with real values
-#        #   (need a function)
-#        output.write(line)
-    
+
     
     return
-
-# tags are 
-#   <hdr_obsdate_sci>: YYYY Mon DD
-#   <hdr_obsdate_tel>: YYYY Mon DD
-#   <rootname_sci>: SYYYYMMDD
-#   <rootname_tel>: SYYYYMMDD
-#   
 
 #--------------------
 
