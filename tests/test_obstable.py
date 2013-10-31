@@ -3,6 +3,7 @@ from nose.tools import assert_list_equal
 from nose.tools import assert_equal
 from nose.tools import assert_raises
 from nose.tools import assert_multi_line_equal
+import os.path
 
 class TestObsRecord:
     
@@ -45,6 +46,9 @@ class TestObsRecord:
 class TestObsTable(): 
     @classmethod
     def setup_class(cls):
+        testdir = os.path.dirname(os.path.abspath(__file__))
+        
+        TestObsTable.pretty = os.path.join(testdir, 'prettytable.dat')
         TestObsTable.filename = 'testtable.dat'
         TestObsTable.obsrecord = obstable.ObsRecord(targetname='SDSSJ000429.46-002142.8', 
                                                      rootname='S20130719', 
@@ -144,6 +148,14 @@ class TestObsTable():
         result = open('testtable2.dat', 'r').read()
         os.remove('testtable2.dat')
         assert_multi_line_equal(result, expected_result)
+
+    def test_pretty_table(self):
+        TestObsTable.obstable.filename = TestObsTable.filename
+        TestObsTable.obstable.pretty_table()
+        expected_result = open(TestObsTable.pretty, 'r').read()
+        result = open(TestObsTable.filename, 'r').read()
+        assert_multi_line_equal(result, expected_result)
+    
     
     def test_append_table(self):
         pass

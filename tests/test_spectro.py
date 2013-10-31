@@ -7,6 +7,7 @@ from nose.tools import assert_list_equal
 from nose.tools import assert_almost_equal
 from numpy.testing import assert_array_equal
 import numpy as np
+import os.path
 
 class TestLine:
     
@@ -129,6 +130,7 @@ class TestLineList:
         TestLineList.quasar_rest = \
                 [ ('HeI', 0.5876 * u.micron),
                   ('HeI', 1.083 * u.micron),
+                  ('H_alpha', 0.6563 * u.micron),
                   ('Pa_epsilon', 0.9546 * u.micron),
                   ('Pa_delta', 1.005 * u.micron),
                   ('Pa_gamma', 1.094 * u.micron),
@@ -178,7 +180,9 @@ class TestSpectrum:
     
     @classmethod
     def setup_class(cls):
-        TestSpectrum.testfile = 'JHK.fits'
+        testdir = os.path.dirname(os.path.abspath(__file__))
+        
+        TestSpectrum.testfile = os.path.join(testdir, 'JHK.fits')
         TestSpectrum.wcs_string = "WCSAXES =                    1 / Number of coordinate axes                      CRPIX1  =                    1 / Pixel coordinate of reference point            PC1_1   =        6.57288848851 / Coordinate transformation matrix element       CDELT1  =                    1 / Coordinate increment at reference point        CTYPE1  = 'LINEAR'             / Coordinate type code                           CRVAL1  =        9719.45605469 / Coordinate value at reference point            LATPOLE =                   90 / [deg] Native latitude of celestial pole        RESTFRQ =                    0 / [Hz] Line rest frequency                       RESTWAV =                    0 / [Hz] Line rest wavelength                      RADESYS = 'FK5'                / Equatorial coordinate system                   MJD-OBS =        56580.1992188 / [d] MJD of observation matching DATE-OBS       DATE-OBS= '2013-10-15T04:46:52.500' / ISO-8601 observation date matching MJD-OBS"
 
     

@@ -118,6 +118,14 @@ class ObsTable:
         # in memory in the ObsTable.  It's easy enough to merge the records if I have
         # two ObsTable.
         return
+
+    def pretty_table(self):
+        from astropy.io import ascii
+        table = ascii.read(self.filename)
+        ascii.write(table, output=self.filename, 
+                    Writer=ascii.FixedWidth, bookend=False, 
+                    delimiter=None)
+        return
     
 class ObsRecord:
     def __init__(self, targetname=None, rootname=None, band=None, grism=None, 
