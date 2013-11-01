@@ -75,9 +75,14 @@ class ObsTable:
                 for line in table:
                     if line.startswith('#'):
                         continue
-                    record = ObsRecord()
-                    record.read_record(line)
-                    self.add_records_to_table(record)
+                    try:
+                        record = ObsRecord()
+                        record.read_record(line)
+                        self.add_records_to_table(record)
+                    except:
+                        #probably the title bar  
+                        # (pretty format doesn't start with #)
+                        continue
         except IOError:
             raise
         table.close()
