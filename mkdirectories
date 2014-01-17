@@ -1,40 +1,40 @@
 #!/usr/bin/env python
+"""
+mkdirectories is a tool to create the necessary directory strucuture
+for reducing the F2 long slit data for the GS-2013B-Q-73 project.
+"""
 
 import argparse
 from bookkeeping import mkdirectories
 
-VERSION = '1.0.0'
+VERSION = '1.0.1'
 
 def parse_args():
-	"""
-	Parse command line arguments.
-	"""
-	p = argparse.ArgumentParser(description='Create DR directory structure')
-	p.add_argument('programID', type=str, nargs=1, help='Program ID')
-	p.add_argument('targetname', type=str, nargs=1, help='Target name')
-	p.add_argument('obsdate', type=str, nargs=1, help='YYYYMMDD Date of observation')
-	p.add_argument('reduxdate', type=str, nargs=1, help='DDMonYYYY Date of reduction')
-	p.add_argument('bands', type=str, nargs='+', help='Bands')
-	
-	p.add_argument('-v', '--verbose', dest='verbose', action='store_true', default=False, help='Toggle on verbose mode')
-	p.add_argument('--debug', dest='debug', action='store_true', default=False, help='Toggle on debug mode')
-	
-	args = p.parse_args()
+    """
+    Parse command line arguments.
+    """
+    parser = argparse.ArgumentParser(
+					description='Create DR directory structure')
+    parser.add_argument('programID', type=str, help='Program ID')
+    parser.add_argument('targetname', type=str, help='Target name')
+    parser.add_argument('obsdate', type=str, 
+						help='YYYYMMDD Date of observation')
+    parser.add_argument('reduxdate', type=str, 
+						help='DDMonYYYY Date of reduction')
+    parser.add_argument('bands', type=str, nargs='+', help='Bands')
+    
+    parser.add_argument('-v', '--verbose', dest='verbose', 
+					action='store_true', default=False, 
+					help='Toggle on verbose mode')
+    parser.add_argument('--debug', dest='debug', action='store_true', 
+					default=False, help='Toggle on debug mode')
+        
+    if parser.parse_args().debug:
+        print parser.parse_args()
 
-	# Get the positional arguments out of a list
-	args.programID = args.programID[0]
-	args.targetname = args.targetname[0]
-	args.obsdate = args.obsdate[0]
-	args.reduxdate = args.reduxdate[0]
-	
-	if args.debug:
-		print args
-	
-	
-	
-	return args
-	
+    return parser.parse_args()
+    
 if __name__ == '__main__':
-	args = parse_args()
-	mkdirectories(args.programID, args.targetname, 
-		args.obsdate, args.reduxdate, args.bands)
+    ARGS = parse_args()
+    mkdirectories(ARGS.programID, ARGS.targetname, 
+        ARGS.obsdate, ARGS.reduxdate, ARGS.bands)
