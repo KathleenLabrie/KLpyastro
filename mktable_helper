@@ -1,31 +1,53 @@
 #!/usr/bin/env python
+# pylint: disable=C0301
+"""
+mktable_helper is a tool designed to help in the creation of the 
+data summary and association table.  Be careful and quit often to
+save your work.  It is a bit clunky but it does the job.  Despite
+the problems, it beats having to write that table by hand.
+
+Format for the table looks like this:
+Targetname   rootname  band grism  datatype applyto     filerange exptime LNRS rdmode
+SDSS..       S20130719 HK   HK     Science  None        496-499   90      6    faint
+SDSS..       S20130719 HK   HK     Dark     Science,Arc 592-595   90      1    faint
+SDSS..       S20130719 HK   HK     Flat     Science,Arc 501       4       1    bright
+SDSS..       S20130719 HK   HK     Dark     Flat        588-591   4       1    bright
+etc.
+
+"""
+# pylint: enable=C0301
 
 import argparse
 from bookkeeping import mktable_helper
 
-VERSION = '1.0.0'
+VERSION = '1.0.1'
 
 def parse_args():
-	"""
-	Parse command line arguments.
-	"""
-	p = argparse.ArgumentParser(description='Add to observation table.')
-	p.add_argument('tablename', type=str, nargs=1, help='Name of the output table')
-	p.add_argument('--disable-auto', dest='auto', action='store_false', help='Disable the automatic mode')
-	p.add_argument('--rawdir', dest='rawdir', action='store', default='./', help='Location of the data')
-	p.add_argument('-v', '--verbose', dest='verbose', action='store_true', default=False, help='Toggle on verbose mode')
-	p.add_argument('--debug', dest='debug', action='store_true', default=False, help='Toggle on debug mode')
-	
-	args = p.parse_args()
-	if args.debug:
-		print args
-		print args.tablename
-		print args.auto
-		print args.rawdir
-	
-	return args
+    """
+    Parse command line arguments.
+    """
+    parser = argparse.ArgumentParser(description='Add to observation table.')
+    parser.add_argument('tablename', type=str, 
+                        help='Name of the output table')
+    parser.add_argument('--disable-auto', dest='auto', action='store_false', 
+                        help='Disable the automatic mode')
+    parser.add_argument('--rawdir', dest='rawdir', action='store', 
+                        default='./', help='Location of the data')
+    parser.add_argument('-v', '--verbose', dest='verbose', 
+                        action='store_true', default=False, 
+                        help='Toggle on verbose mode')
+    parser.add_argument('--debug', dest='debug', action='store_true', 
+                        default=False, help='Toggle on debug mode')
+    
+    if parser.parse_args().debug:
+        print parser.parse_args()
+        print parser.parse_args().tablename
+        print parser.parse_args().auto
+        print parser.parse_args().rawdir
+    
+    return parser.parse_args
 
 if __name__ == '__main__':
-	args = parse_args()
-	mktable_helper(args.tablename[0], auto=args.auto,
-				rawdir=args.rawdir)
+    ARGS = parse_args()
+    mktable_helper(ARGS.tablename, auto=ARGS.auto,
+                rawdir=ARGS.rawdir)

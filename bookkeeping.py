@@ -1,8 +1,27 @@
-# create directory structure
-# use template and inputs on file names to create reduction scripts
+# bookkeeping.py module
+"""
+Bookkeeping functions to help reduce F2 data.
+"""
 
 def mkdirectories(program, targetname, obsdate, reduxdate, bands):
-    # One target at a time.  Obsdate/reduxdate combination.
+    """
+    Create the directory structure organizing the reduction of data.
+    Can process only one target and obsdate/reduxdate combination 
+    at a time.  Multiple bands is okay.
+    
+    :param program: Program name, eg. GS-2013B-Q-73
+    :type program: str
+    :parma targetname: Target name, eg. SDSSJ011758.83+002021.4
+    :type targetname: str
+    :param obsdate: Observation date, eg. 20131015
+    :type obsdate: str
+    :param reduxdate: Date the reduction was done, 16Oct2013
+    :type reduxdate: str
+    :param bands: List of bands for which data was taken that night.
+        Each band will be given its own directory. Eg. ['JH', 'HK']
+    :type bands: list of str
+    """
+
     import os
     import os.path
     
@@ -29,7 +48,7 @@ def mkdirectories(program, targetname, obsdate, reduxdate, bands):
     if not os.path.exists('sciproducts'):
         os.makedirs('sciproducts')
     # date directory
-    datedir = '-'.join([obsdate,reduxdate])
+    datedir = '-'.join([obsdate, reduxdate])
     if not os.path.exists(datedir):
         os.makedirs(datedir)
     
@@ -38,13 +57,13 @@ def mkdirectories(program, targetname, obsdate, reduxdate, bands):
     
     # redux directories
     for band in bands:
-        reduxdir=''.join(['redux',band])
+        reduxdir = ''.join(['redux', band])
         if not os.path.exists(reduxdir):
             os.makedirs(reduxdir)
     
     # README file
     if not os.path.exists('README'):
-        write_README_template()
+        write_readme_template()
     
     # Possibly create and add the redux scripts once the tool
     # has been created.
@@ -55,6 +74,20 @@ def mkdirectories(program, targetname, obsdate, reduxdate, bands):
 
 
 def mktable_helper(tablename, auto=True, rawdir="./"):
+    """
+    Create or append to an observation summary table.
+    This function is interactive and requires input from the users.
+    
+    :param tablename: Filename for the table.  If it exists it will
+        be extended.
+    :type tablename: str
+    :param auto: If True, get some of the information directly from
+        the FITS headers.  [Default: True]
+    :type auto: boolean
+    :param rawdir: Path to raw data.  Required for auto=True.
+        [Default: "./"]
+    :type rawdir: str
+    """
     import obstable
     import os.path
     if auto:
@@ -65,7 +98,7 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
     # Error handling: If the file exists but there's an read error,
     # raise, otherwise assume that you are creating a new file.
     table = obstable.ObsTable()
-    table.filename=tablename
+    table.filename = tablename
     try:
         table.read_table()
     except IOError:
@@ -111,11 +144,13 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
                 # and keep it open until we're done requesting inputs
                 # (instead of opening and closing it every time).
                 if auto and filename_not_known:
-                    if user_inputs.has_key('rootname') and user_inputs.has_key('filerange'):
+                    if user_inputs.has_key('rootname') and \
+                       user_inputs.has_key('filerange'):
                         # parse filerange, build filename (with rawdir path)
                         filenumbers = parse_filerange(user_inputs['filerange'])
-                        filename = "%sS%04d.fits" % (user_inputs['rootname'], filenumbers[0])
-                        filename = os.path.join(rawdir,filename)
+                        filename = "%sS%04d.fits" % \
+                                (user_inputs['rootname'], filenumbers[0])
+                        filename = os.path.join(rawdir, filename)
 
                         # open ad
                         ad = AstroData(filename)                        
@@ -146,15 +181,23 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
     
     return
 
-def mkreduxscript(tablename, targetname, band, shorttarget,
-                  rootname):
-
-    
-    return
+#def mkreduxscript(tablename, targetname, band, shorttarget,
+#                  rootname):
+#
+#    
+#    return
 
 #--------------------
 
 def get_req_input_list():
+    """
+    Return a list of prompts to present to the user.  For each
+    prompt, specify whether the info can be found in the header
+    and assign an identifier.
+    
+    :rtype: list of dictionaries 
+    """
+    
     root_prompt = {'prompt': 'File root name (e.g. S201202012): ',
                    'in_hdr': False,
                    'id': 'rootname'}
@@ -193,6 +236,21 @@ def get_req_input_list():
             rdmode_prompt]
 
 def query_header(ad, requested_input):
+    """
+    Returns the header value associated with the 'requested_input'
+    string.  The requested_input strings are defined in get_req_input_list(),
+    and they correspond to columns in the observation summary table.
+    
+    :param ad: AstroData object that contains the header information.
+    :type ad: AstroData object
+    :param requested_input: Information to retrieve from the header.  The
+        valid strings correspond to the 'id' in the dictionaries returned
+        by get_req_input_list().  Only the prompts with 'in_hdr'=True are
+        valid.
+    :type requested_intput: str
+    :rtype: str
+    """
+    
     # warning: might not be efficient if the descriptor system is slow
     # might have to change to if-elif sequence.  (but it's kinda cool
     # looking this way.)
@@ -206,6 +264,14 @@ def query_header(ad, requested_input):
     }[requested_input]
     
 def create_record(user_inputs):
+    """
+    Create a ObsRecord from the informations gathered from the users.
+    
+    :param user_inputs: Dictionary with all the values (as strings) required
+        to fully populate a ObsRecord object.
+    :type user_inputs: dict
+    :rtype: ObsRecord object
+    """
     import obstable
     
     record = obstable.ObsRecord()
@@ -223,33 +289,46 @@ def create_record(user_inputs):
     return record
 
 def parse_filerange(filerange):
-    # Parse strings like this.  
-    #    210-214
-    #    215
-    #    216,217
-    #    218-221,223-225
-    filenumbers=[]
+    """
+    Parse strings like this:  
+        210-214
+        215
+        216,217
+        218-221,223-225
+    and produce a list of integers corresponding to the range expressed
+    in the string.
+    
+    :param filerange: String representing a range of integers.
+    :type filerange: str
+    :rtype: list of int
+    """
+    filenumbers = []
     ranges = filerange.split(',')
-    for range in ranges:
-        boundaries = range.split('-')
+    for range_limits in ranges:
+        boundaries = range_limits.split('-')
         if len(boundaries) == 1:
             filenumbers.append(int(boundaries[0]))
         elif len(boundaries) == 2:
-            n = int(boundaries[0])
-            while n <= int(boundaries[1]):
-                filenumbers.append(n)
-                n+=1
+            number = int(boundaries[0])
+            while number <= int(boundaries[1]):
+                filenumbers.append(number)
+                number += 1
         else:
             raise RuntimeError
     
     return filenumbers
 
-def write_README_template():
-    f = open('README', 'w')
-    f.write("Reduced with\n")
-    f.write("  reduxF2LS-BELR  [hg #:sha / github sha]\n")
-    f.write("  gemini_iraf [version]\n")
-    f.write("\n")
-    f.write("QUICKLOOK ONLY - NOT SQ or FOR SCIENCE\n")
-    f.close()
+def write_readme_template():
+    """
+    When creating a directory structure, create also a short README
+    file in which the version numbers of the DR software will be stored.
+    """
+    
+    readme_file = open('README', 'w')
+    readme_file.write("Reduced with\n")
+    readme_file.write("  reduxF2LS-BELR  [hg #:sha / github sha]\n")
+    readme_file.write("  gemini_iraf [version]\n")
+    readme_file.write("\n")
+    readme_file.write("QUICKLOOK ONLY - NOT SQ or FOR SCIENCE\n")
+    readme_file.close()
     return
