@@ -47,15 +47,6 @@ def parse_args():
     if parser.parse_args().debug:
         print parser.parse_args()
     
-    ext = parser.parse_args().extension.split(',')
-    if ext[0].isdigit():
-        parser.parse_args().extension = int(ext[0])
-    else:
-        parser.parse_args().extension = (ext[0].upper(), int(ext[1]))
-    
-    if parser.parse_args().debug:
-        print parser.parse_args().extension
-    
     return parser.parse_args()
 
 if __name__ == '__main__':
