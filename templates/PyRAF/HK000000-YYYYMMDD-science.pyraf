@@ -1,12 +1,29 @@
 ###############################################################################
 # Once this script has been properly edited, it can be run by copying and     #
-# pasting each command into an IRAF or PyRAF session, or by defining this     #
-# script as a task by typing:                                                 #
-#                                                                             #
-#   ecl> task $thisscript="thisscript.cl"                                     #
-#   ecl> thisscript                                                           #
+# pasting each command into a PyRAF session.                                  #
 #                                                                             #
 ###############################################################################
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#  Things to edit for each new observation
+#
+# - RENAME THE FILE, and put in target_name/science directory.
+#
+# - Observation UT date in top comment
+# - Data filename prefix in top comment
+# - File numbers in top comment
+# - Filter, grism, slit width, and exposure times in top comment
+# - Name of telluric in top comment
+#
+# - The "HK000429" string throughout the script to match your source name.
+# - The data filename prefix in the gemlist section
+# - The file numbers in the gemlist section.
+# Note the "gemlist" section is where the input file lists are created.
+#
+# - If the science darks are being used for the arcs as well, select
+#   the appropriate concat statement locate just below the gemlist section.
+#	Instructions included there.
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 # The data files have been separated by filter and exposure time, where
 # appropriate. This information can be found in the primary header unit (PHU)
@@ -114,10 +131,16 @@ gemlist "S20130719S" "560-563"     > "teldark.lis"
 # If they are the same use the second version of concat
 # (There's a problem in f2prepare that makes it barf if there
 #  are duplicates.)
+
+#  CAREFUL HERE
+# If no duplicate darks, use this:
 #concat ("flat.lis,flatdark.lis,arc.lis,arcdark.lis,obj.lis,objdark.lis,\
 #tel.lis,teldark.lis", "all.lis")
+
+# If there are duplicate, use this instead.
 concat ("flat.lis,flatdark.lis,arc.lis,obj.lis,objdark.lis,\
 tel.lis,teldark.lis", "all.lis")
+
 
 ###############################################################################
 # STEP 4: Visually inspect the data                                           #
