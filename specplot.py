@@ -55,9 +55,8 @@ def specplot(hdulist, spec_ext, annotations=None,
     
     Raises
     ______
-    TODO : catch exceptions in specplot()
-    IShouldAddExceptions
-        Because I should catch issues.
+    NotImplementedError
+        Some features are not yet implemented.
     
     See Also
     --------
@@ -85,8 +84,9 @@ def specplot(hdulist, spec_ext, annotations=None,
         linelist = spectro.LineList(annotations.line_list_name,
                                     annotations.redshift)
     # Get the band limits.
-    # *** Not yet implemented.
-#    if annotations.draw_band_limits:
+    if annotations.draw_bands_limits:
+        errmsg = 'Draw bands limits feature not implemented.'
+        raise NotImplementedError, errmsg
 #        bandlist = spectro.BandList(spectrum.wlen[0], spectrum.wlen[-1])
     
     
@@ -139,22 +139,16 @@ class SpecPlotAnnotations:
         Default = False.
     line_list_name : str, optional
         Name of the line list to use.  The lists are defined in 
-        spectro.linelist_dict.  line_list_name must be set if annotate_lines
+        spectro.LINELIST_DICT.  line_list_name must be set if annotate_lines
         is set to True.
     redshift : float, optional
         Redshift to apply to the line list. Default = 0.
     title : str, optional
         Title for the plot.
-    
-    Raises
-    ------
-    
+        
     See Also
     --------
-    spectro.linelist_dict : Defined line lists.
-    
-    Examples
-    --------
+    spectro.LINELIST_DICT : Defined line lists.
     """
     def __init__(self, title=None):
         self.title = title
@@ -170,19 +164,27 @@ class SpecPlotAnnotations:
         Parameters
         ----------
         line_list_name : str
-            Name of the line list as defined in spectro.linelist_dict.
+            Name of the line list as defined in spectro.LINELIST_DICT.
                 
         Raises
         ------
+        KeyError
+            The line list name is invalid.  It is not defined in 
+            spectro.LINELIST_DICT.
         
         See Also
         --------
-        spectro.linelist_dict : Line list are defined in there.  Only
+        spectro.LINELIST_DICT : Line list are defined in there.  Only
                 those names are valid.
         """
-        # TODO: add checks for valid line_list_name
-        self.line_list_name = line_list_name
-        self.annotate_lines = True
+        if line_list_name in spectro.LINELIST_DICT.keys():
+            self.line_list_name = line_list_name
+            self.annotate_lines = True
+        else:
+            print 'ERROR: line_list_name \"%s\" invalid.' % (line_list_name)
+            print 'ERROR: Valid lists are: ', spectro.LINELIST_DICT.keys()
+            raise KeyError, line_list_name
+
         return
     
     def set_redshift(self, redshift):
@@ -230,9 +232,18 @@ def get_valid_extension(extension_string):
     
     Returns
     _______
+    int or tuple
+        If the input is just the extension version, returns it as an int.
+        Otherwise, returns a two elements in the tuple with the first element
+        containing the extension name as an upper case str and the second 
+        containing the extension version as an int.
     
     Examples
     --------
+    >>> get_valid_extension('sci,1')
+    ('SCI',1)
+    >>> get_valid_extension('1')
+    1
     """
     ext = extension_string.split(',')
     if ext[0].isdigit():
@@ -243,6 +254,10 @@ def get_valid_extension(extension_string):
     return valid_extension
 
 def example():
+    """
+    This is just an example.  Cut and paste that on the python prompt.
+    It can also be run as specplot.example().
+    """
     import numpy as np
     import matplotlib.pyplot as plt
     from astropy import wcs
