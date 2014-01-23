@@ -9,10 +9,13 @@ lines we are interested in.
 
 import argparse
 import specplot
+from spectro import LINELIST_DICT
 from astrodata import AstroData
 import matplotlib.pyplot as plt
 
 VERSION = '0.1.1'
+
+VALID_LINE_LISTS = LINELIST_DICT.keys()
 
 def parse_args():
     """
@@ -27,7 +30,7 @@ def parse_args():
     parser.add_argument('-t', '--title', dest='title', type=str, 
                     action='store', default='', help='Title for the plot')
     parser.add_argument('-l', '--linelist', dest='linelist', type=str, 
-                    action='store', default=None, 
+                    action='store', default=None, choices=VALID_LINE_LISTS, 
                     help='Name of the line list to use for annotation')
     parser.add_argument('-z', '--redshift', dest='redshift', type=float,
                     action='store', default=0.,
@@ -45,7 +48,7 @@ def parse_args():
                     help='Toggle on verbose mode')
     parser.add_argument('--debug', action='store_true', default=False,
                     help='Toggle on debug mode')
-        
+            
     if parser.parse_args().debug:
         print parser.parse_args()
     

@@ -6,10 +6,10 @@ from astropy import units as u
 class Line:
     # redshift is z, not velocity
     def __init__(self, restwlen=None, obswlen=None, redshift=None, name=None):
-        self.restwlen=restwlen
-        self.obswlen=obswlen
-        self.redshift=redshift
-        self.name=name
+        self.restwlen = restwlen
+        self.obswlen = obswlen
+        self.redshift = redshift
+        self.name = name
         
         # try to set undefined attributes from the others.
         self.set_obswlen(obswlen)
@@ -56,16 +56,20 @@ class Spectrum:
         if self.wunit is None:
             self.wunit = self.get_wunit(hdu)
     
-    def get_counts_array_from_hdu(self, hdu):
+    @classmethod
+    def get_counts_array_from_hdu(cls, hdu):
         return hdu.data
     
-    def get_pixel_array_from_hdu(self, hdu):
+    @classmethod
+    def get_pixel_array_from_hdu(cls, hdu):
         return np.arange(len(hdu.data))
     
-    def get_wcs_from_hdu(self, hdu):
+    @classmethod
+    def get_wcs_from_hdu(cls, hdu):
         return wcs.WCS(hdu.header.tostring())
     
-    def get_wunit(self, hdu):
+    @classmethod
+    def get_wunit(cls, hdu):
         unit_str = hdu.header['WAT1_001'].split()[2].split('=')[1]
         if unit_str.endswith('s'):
             unit_str = unit_str[:-1]
@@ -89,17 +93,17 @@ class AtmosphericTransparency:
         cutoff_positions = np.where(self.transmission < cutoff)
         wblocks = []
         tolerance = 10
-        current_block_starts=0
-        current_block_ends=0
+        current_block_starts = 0
+        current_block_ends = 0
         for pos in cutoff_positions:
             if (pos - current_block_ends) <= tolerance:
-                current_block_ends=pos
+                current_block_ends = pos
                 prev_pos = pos
             else:
                 # end of a block
                 wlow = self.wlen[current_block_starts] 
                 whigh = self.wlen[current_block_ends]
-                wblocks.append((wlow,whigh))
+                wblocks.append((wlow, whigh))
         
         # to save an if in the loop I just let the first
         # block at position 0 be appended to the wblocks
@@ -148,12 +152,12 @@ class LineList:
     def __init__(self, name, redshift=0.):
         self.name = name
         self.redshift = redshift
-        self.lines = self.get_lines_from_list(name, redshift)
+        self.lines = self.get_lines_from_list()
 
-    def get_lines_from_list(self, name, redshift):
+    def get_lines_from_list(self):
         lines = []
-        for line_data in linelist_dict[name]:
-            line = Line(restwlen=line_data[1], redshift=redshift, 
+        for line_data in LINELIST_DICT[self.name]:
+            line = Line(restwlen=line_data[1], redshift=self.redshift, 
                         name=line_data[0]) 
             lines.append(line)
         return lines
@@ -166,7 +170,8 @@ class LineList:
 
 # -------------------------------
 
-linelist_dict = {
+# pylint: disable=E1101
+LINELIST_DICT = {
     'quasar' : [  ('HeI', 0.5876 * u.micron),
                   ('HeI', 1.083 * u.micron),
                   ('H_alpha', 0.6563 * u.micron),
@@ -184,7 +189,8 @@ linelist_dict = {
                 ]
     }
 
-bands_table = [(1.2 * u.micron, 'J-band'),
+BANDS_TABLE = [(1.2 * u.micron, 'J-band'),
                (1.6 * u.micron, 'H-band'),
                (2.2 * u.micron, 'K-band')
                ]
+# pylint: enable=E1101
