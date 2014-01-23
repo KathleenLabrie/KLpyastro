@@ -8,7 +8,7 @@ lines we are interested in.
 """
 
 import argparse
-from specplot import specplot
+import specplot
 from astrodata import AstroData
 import matplotlib.pyplot as plt
 
@@ -36,7 +36,9 @@ def parse_args():
                     action='store', default=None, 
                     help='Y-axis lower and upper limit')
     parser.add_argument('-o', dest='output', type=str, action='store',
-                    default=None, help='Name of the png output.')
+                    default=None, 
+                    help='Name of the png output, with or without the .png\
+                    file extension.')
     
     parser.add_argument('-v', '--verbose', dest='verbose', 
                     action='store_true', default=False, 
@@ -53,7 +55,11 @@ if __name__ == '__main__':
     ARGS = parse_args()
     
     ad = AstroData(ARGS.spectrum)
-    specplot(ad.hdulist, ARGS.extension, title=ARGS.title,
-            line_list_name=ARGS.linelist, redshift=ARGS.redshift,
+    SP_ANNOTATIONS = specplot.SpecPlotAnnotations(ARGS.title)
+    if ARGS.linelist is not None:
+        SP_ANNOTATIONS.set_line_list_name(ARGS.linelist)
+        SP_ANNOTATIONS.set_redshift(ARGS.redshift)
+    specplot.specplot(ad.hdulist, ARGS.extension,
+            annotations=SP_ANNOTATIONS,
             ylimits=ARGS.ylim, output_plot_name=ARGS.output)
     plt.show(block=True)
