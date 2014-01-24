@@ -137,6 +137,13 @@ class TestLineList:
                   ('Pa_beta', 1.282 * u.micron),
                   ('Pa_alpha', 1.875 * u.micron)
                  ]
+        TestLineList.paschen_rest = \
+                [('Pa_epsilon', 0.9546 * u.micron),
+                  ('Pa_delta', 1.005 * u.micron),
+                  ('Pa_gamma', 1.094 * u.micron),
+                  ('Pa_beta', 1.282 * u.micron),
+                  ('Pa_alpha', 1.875 * u.micron)
+                ]
     
     @classmethod
     def teardown_class(cls):
@@ -150,7 +157,10 @@ class TestLineList:
     
     def test_init(self):
         # setup init a LineList
-        expected_result = TestLineList.quasar_rest
+        
+        # need to use list() to make a true copy, otherwise quasar_rest gets
+        # extended when expected_result is.
+        expected_result = list(TestLineList.quasar_rest)
         expected_result.extend(['quasar', 0.])
         result = []
         for line in TestLineList.linelist.lines:
@@ -165,11 +175,21 @@ class TestLineList:
             result.append( (line.name, line.restwlen) )
         assert_list_equal(result,expected_result)
             
-    def test_apply_redshift(self):
+    def test_append_linelist(self):
+        expected_results = list(TestLineList.quasar_rest)
+        expected_results.extend(TestLineList.paschen_rest)
+        TestLineList.linelist.append_linelist('paschen')
+        result = []
+        for line in TestLineList.linelist.lines:
+            result.append( (line.name, line.restwlen) )
+        assert_list_equal(result,expected_results)
+        
+    def test_reapply_redshift(self):
         expected_result = []
         for (name, wlen) in TestLineList.quasar_rest:
-          expected_result.append((name,wlen*2))
-        TestLineList.linelist.apply_redshift(1.)
+            expected_result.append((name, wlen*2))
+        TestLineList.linelist.redshift=1.
+        TestLineList.linelist.reapply_redshift()
         result = []
         for line in TestLineList.linelist.lines:
             result.append( (line.name, line.obswlen) )
@@ -258,61 +278,5 @@ class TestSpectrum:
         assert_almost_equal(result[1], expected_result[1],3)
         assert_almost_equal(result[2], expected_result[2],3)
 
-
-class TestAtmosphericTransparency:
-
-    @classmethod
-    def setup_class(cls):
-        pass
-    
-    @classmethod
-    def teardown_class(cls):
-        pass
-    
-    def setup(self):
-        pass
-    
-    def teardown(self):
-        pass
-
-    def test_init(self):
-        pass
-   
-    
-class TestTransmissionBand:
-    
-    @classmethod
-    def setup_class(cls):
-        pass
-    
-    @classmethod
-    def teardown_class(cls):
-        pass
-    
-    def setup(self):
-        pass
-    
-    def teardown(self):
-        pass
-
-    def test_init(self):
-        pass
-    
-class TestBandList:
-    
-    @classmethod
-    def setup_class(cls):
-        pass
-    
-    @classmethod
-    def teardown_class(cls):
-        pass
-    
-    def setup(self):
-        pass
-    
-    def teardown(self):
-        pass
-    
 
     

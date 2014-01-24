@@ -1,10 +1,88 @@
+# spectro.py
+"""
+Classes and definitions related to spectroscopic data.
+"""
+
 import numpy as np
 from astropy import wcs
-from astropy.io import ascii
 from astropy import units as u
 
 class Line:
-    # redshift is z, not velocity
+    """
+    Class to represent a spectral line.
+    
+    A Line contains information about the rest wavelength, the observed
+    wavelength, the redshift, and its name.  Those characteristics can
+    be set when the instance is created, or set or calculated later with 
+    a method.  If only some of the parameters are set, the constructor
+    will try to set the other attributes.  For example, if the rest wavelength
+    and the redshift are given, the construction will calculate and set the
+    observed wavelength.
+    
+    Parameters
+    ----------
+    restwlen : float or Quantity, optional
+        Rest wavelength.
+    obswlen : float or Quantity, optional
+        Observed wavelength.
+    redshift : float, optional
+        Redshift that links the rest and observed wavelengths.
+    name : str, optional
+        The line identification.
+    
+    Attributes
+    ----------
+    restwlen : float or Quantity
+        Rest wavelength.
+    obswlen : float or Quantity
+        Observed wavelength.
+    redshift : float
+        Redshift that links the rest and observed wavelengths.  The redshift
+        is 'z', not a velocity.
+    name : str
+        The line identification.
+    
+    Methods
+    -------
+    set_obswlen(obswlen)
+        Set the obswlen attribute.  If obswlen parameter is None, try to use
+        the other attributes to calculate obswlen.
+    set_restwlen(restwlen)
+        Set the restwlen attribute.  If restwlen parameter is None, try to use
+        the other attributes to calculate restwlen.
+    set_redshift(redshift)
+        Set the redshift attribute.  If redshift parameter is None, try to use
+        the other attributes to calculate redshift.
+    set_name(name)
+        Set the name of the line.
+    validate_wavelengths()
+        
+    
+    Raises
+    ------
+    Notes
+    -----
+    It is recommended to use the "set" methods to set the attributes.
+    
+    Examples
+    --------
+    >>> myline = Line(restwlen=0.5876*u.micron, redshift=1.)
+    >>> myline.__dict__
+    {'name': None, 'obswlen': <Quantity 1.1752 micron>, '
+    restwlen': <Quantity 0.5876 micron>, 'redshift': 1.0}
+    
+    Note that the obswlen attribute has been automatically calculated from
+    the rest wavelength and the redshift specified in the construction call.
+    
+    >>> myline = Line()
+    >>> myline.set_restwlen(0.5876*u.micron)
+    >>> myline.set_redshift(1.)
+    >>> myline.set_obswlen()
+    
+    Two of the three wavelength attributes must be set in order to calculate
+    the third.
+    """
+    
     def __init__(self, restwlen=None, obswlen=None, redshift=None, name=None):
         self.restwlen = restwlen
         self.obswlen = obswlen
@@ -44,6 +122,8 @@ class Line:
         self.name = name
         return
 
+    def validate_wavelengths(self):
+        assert self.obswlen == (self.redshift + 1) * self.restwlen
 
 class Spectrum:
     def __init__(self, hdu, wunit=None):
@@ -78,99 +158,159 @@ class Spectrum:
     def apply_wcs_to_pixels(self):
         return self.wcs.wcs_pix2world(zip(self.pix), 0)
     
-    
-class AtmosphericTransparency:
-    def __init__(self, filename, wunit='Angstrom'):
-        data = ascii.read(filename)
-        self.wlen = data.field('wlen').data
-        self.transmission = data.field('T').data
-        self.wunit = u.Unit(wunit)
-        #data.field('wlen').units
-    
-    def get_blocked_regions(self, cutoff=0.8, lower=None, upper=None):
-        blocked_regions = []
-        # wlength range with T < 0.5 = blocked region
-        cutoff_positions = np.where(self.transmission < cutoff)
-        wblocks = []
-        tolerance = 10
-        current_block_starts = 0
-        current_block_ends = 0
-        for pos in cutoff_positions:
-            if (pos - current_block_ends) <= tolerance:
-                current_block_ends = pos
-                prev_pos = pos
-            else:
-                # end of a block
-                wlow = self.wlen[current_block_starts] 
-                whigh = self.wlen[current_block_ends]
-                wblocks.append((wlow, whigh))
-        
-        # to save an if in the loop I just let the first
-        # block at position 0 be appended to the wblocks
-        # Here I just remove it.  (I make sure it's a 0-0)
-        if wblocks[0][0] == wblocks[0][1]:
-            wblocks = wblocks[1:]
-        
-        return block_regions
-
-class TransmissionBand:
-    # transmission: ndarray of values 0 to 1
-    # central wavelength: Angstrom
-    def __init__(self, name):
-        self.name = name
-        (self.wlen, self.transmission) = self.get_transmission_curve(name)
-    
-    def get_transmission_curve(self, name):
-        data = ascii.read(''.join([name,'.dat']))
-        wlen = data.field('wlen').data
-        transmission = data.field('T').data
-        return (wlen, transmission)
-    
-    def get_central_wlen(self):
-        cwlen = 0.
-        return cwlen
-    
-    def get_bandwidth(self, cutoff=0.2):
-        bandwidth = 0.
-        return bandwidth
-        
- 
-class BandList:
-    def __init__(self, lower, upper):  
-        # lower and upper are Quantity objects.  (astropy.units) 
-        self.bands = self.get_bands_for_range(lower, upper)
-    
-    def get_bands_for_range(self, lower, upper):
-        bands = []
-        for (wlen, name) in bands_table:
-            if wlen >= lower and wlen <= upper:
-                band = TransmissionBand(name)
-                bands.append(band)
-        return bands
 
 class LineList:
+    """
+    Create a list of Line objects from a line list defined in LINELIST_DICT.
+    
+    Parameters
+    ----------
+    name : str
+        Name of the line list to retrieve from LINELIST_DICT.
+    redshift : float, optional
+        Redshift to apply to the lines.  Note that the redshift is only 
+        stored. To apply it run the method apply_redshift().  Default = 0.
+    
+    Attributes
+    ----------
+    name : str
+        Name of the line list to retrieve from LINELIST_DICT.
+    redshift : float
+        Redshift to apply to the lines.
+    lines : list of Line
+        List of Line instances.  This is the attribute to access once the 
+        LineList instance has been created.
+    
+    Methods
+    -------
+    reapply_redshift()
+        If the redshift attribute has been changed, reapply the redshift 
+        to the lines.
+    
+    Raises
+    ------
+    KeyError
+        Raised if the line list name is invalid.
+        
+    See Also
+    --------
+    The Line class.
+    
+    Examples
+    --------
+    >>> mylinelist = LineList('quasar')
+    >>> mylinelist.lines
+    [<spectro.Line instance at 0x10339ddd0>, <spectro.Line instance ...
+    <spectro.Line instance at 0x10339d050>, <spectro.Line instance ...
+    <spectro.Line instance at 0x10339fb00>, <spectro.Line instance ...
+    <spectro.Line instance at 0x10339f7e8>, <spectro.Line instance ...]
+    
+    >>> mylinelist.lines[0].obswlen
+    <Quantity 0.5876 micron>
+    >>> mylinelist.redshift = 1.
+    >>> mylinelist.reapply_redshift()
+    >>> ll.lines[0].obswlen
+    <Quantity 1.1752 micron>
+    """
+    
     def __init__(self, name, redshift=0.):
         self.name = name
         self.redshift = redshift
-        self.lines = self.get_lines_from_list()
+        self.lines = self._get_lines_from_list()
 
-    def get_lines_from_list(self):
+    def _get_lines_from_list(self, name=None):
+        """
+        Load the line list as list of Line instances and apply the redshift.
+        
+        The private method will check that the list's name is valid and 
+        retrieve that list from the line dictionary.  Each line is loaded
+        into a Line instance and the redshift is applied.  The redshift 
+        is taken from the instance's "redshift" attribute.
+        
+        Parameters
+        ----------
+        name : str, optional
+            Name of the line list to retrieve.  If not specified, use the
+            instance's "name" attribute.
+        
+        Returns
+        -------
+        list of Line instances
+        
+        Raises
+        ------
+        KeyError
+            Raised if the line list name is invalid.
+        
+        See Also
+        --------
+        LINELIST_DICT for valid line lists.
+        The Line class.
+        """
+
+        if name is None:
+            name = self.name
+        
         lines = []
-        for line_data in LINELIST_DICT[self.name]:
-            line = Line(restwlen=line_data[1], redshift=self.redshift, 
-                        name=line_data[0]) 
-            lines.append(line)
+        try:
+            for line_data in LINELIST_DICT[name]:
+                line = Line(restwlen=line_data[1], redshift=self.redshift, 
+                            name=line_data[0]) 
+                lines.append(line)
+        except KeyError:
+            print 'ERROR: Line list name, "%s", invalid.' % (name)
+            print 'ERROR: Valid lists are:', LINELIST_DICT.keys()
+            raise
+        
         return lines
         
-    def apply_redshift(self, redshift):   
+    def append_linelist(self, name):
+        """
+        Append a line list to an existing list.
+        
+        A line list is appended to the "lines" attribute.  This is a simmple
+        append; the duplicates are not removed, the combined list is not
+        sorted.  The LineList "name" attribute is set to a new string
+        formatted as "oldname+newname".
+        
+        Parameters
+        ----------
+        name : str
+            Name of the line list to append.
+        
+        Examples
+        --------
+        >>> mylinelist = LineList('quasar')
+        >>> mylinelist.append_linelist('paschen')
+        """
+        # duplicates are not removed.
+        # list is not sorted
+        new_lines = self._get_lines_from_list(name)
+        self.lines.extend(new_lines)
+        self.name = '%s+%s' % (self.name, name)
+        
+    def reapply_redshift(self):
+        """
+        Re-apply the redshift to the lines.
+        
+        Re-apply the redshift to the lines.  This is useful when the
+        redshift attribute is changed.
+        
+        Examples
+        --------
+        >>> mylinelist = LineList('quasar', redshift=0.5)
+        >>> mylinelist.redshift = 1.0
+        >>> mylinelist.reapply_redshift()
+        """
         for line in self.lines:
-            line.set_redshift(redshift)
+            line.set_redshift(self.redshift)
             line.set_obswlen()
 
 
 # -------------------------------
 
 # pylint: disable=E1101
+#  This disable is to ignore the u.micron errors (dynamic loading)
 LINELIST_DICT = {
     'quasar' : [  ('HeI', 0.5876 * u.micron),
                   ('HeI', 1.083 * u.micron),
@@ -189,8 +329,4 @@ LINELIST_DICT = {
                 ]
     }
 
-BANDS_TABLE = [(1.2 * u.micron, 'J-band'),
-               (1.6 * u.micron, 'H-band'),
-               (2.2 * u.micron, 'K-band')
-               ]
 # pylint: enable=E1101
