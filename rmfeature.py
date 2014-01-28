@@ -1,19 +1,24 @@
 import sys
-import pyfits
-from numarray import *
-from pylab import *
-import numarray.convolve._lineshape as ls
+from math import pi
+#import pyfits
+from astropy.io import fits
+#from numarray import *
+import numpy as np
+#from pylab import *
+import matplotlib.pyplot as plt
+#import numarray.convolve._lineshape as ls
+import stsci.convolve._lineshape as ls
 
 # In KLpy
-from fitpy.fittools import *
+import fitpy.fittools as ft
 
 # Utility function to open and plot original spectrum
-def openNplot1d (filename, extname="SCI"):
-    hdulist = pyfits.open(filename, 'readonly')
+def openNplot1d (filename, extname=('SCI',1)):
+    hdulist = fits.open(filename, 'readonly')
     sp = hdulist[extname].data
-    x = arange(sp.shape[0])
-    clf()
-    plot (x, sp)
+    x = np.arange(sp.shape[0])
+    plt.clf()
+    plt.plot (x, sp)
     
     return hdulist
 
@@ -24,21 +29,26 @@ def getsubspec (sp):
     x2 = input("Right edge pixel: ")
     
     flux = sp[x1:x2]
-    pixel = arange(x1,x2,1)
+    pixel = np.arange(x1,x2,1)
     
-    sub = zeros((2,flux.shape[0]))
+    sub = np.zeros((2,flux.shape[0]))
     sub[0] = pixel
     sub[1] = flux
     
+    #plt.clf()
+    #plt.plot (pixel, flux)
+    
+    #input('continue')
+
     return sub
 
 def plotresult (sp, bf, nsp):
-    clf()
-    x = arange(0,sp.shape[0],1)
-    plot (x, sp)
-    plot (x, nsp)
-    x = arange(0,bf.shape[0],1)
-    plot (x, bf)
+    plt.clf()
+    x = np.arange(0,sp.shape[0],1)
+    plt.plot (x, sp)
+    plt.plot (x, nsp)
+    x = np.arange(0,bf.shape[0],1)
+    plt.plot (x, bf)
 
 def rmfeature (inspec, outspec, params=None, profile='voigt'):
     #---- plot and get data
@@ -48,7 +58,7 @@ def rmfeature (inspec, outspec, params=None, profile='voigt'):
 
     #---- Get data for section around feature
     linedata = getsubspec(specdata)
-
+    
     #---- Calculate and set initial parameter from linedata
 
     if params==None:
@@ -61,19 +71,19 @@ def rmfeature (inspec, outspec, params=None, profile='voigt'):
                        ((contslope*linedata[0][lineindex]) + contlevel)
         linewidth = 20.   # pixels.  should find a better way.
 
-        cte = Parameter(contlevel)
-        m = Parameter(contslope)
-        A = Parameter(linestrength)
-        mu = Parameter(lineposition)
-        fwhmL = Parameter(linewidth)
-        fwhmD = Parameter(linewidth)
+        cte = ft.Parameter(contlevel)
+        m = ft.Parameter(contslope)
+        A = ft.Parameter(linestrength)
+        mu = ft.Parameter(lineposition)
+        fwhmL = ft.Parameter(linewidth)
+        fwhmD = ft.Parameter(linewidth)
     else:
-        cte = Parameter(params[0])
-        m = Parameter(params[1])
-        A = Parameter(params[2])
-        mu = Parameter(params[3])
-        fwhmL = Parameter(params[4])
-        fwhmD = Parameter(params[5])
+        cte = ft.Parameter(params[0])
+        m = ft.Parameter(params[1])
+        A = ft.Parameter(params[2])
+        mu = ft.Parameter(params[3])
+        fwhmL = ft.Parameter(params[4])
+        fwhmD = ft.Parameter(params[5])
 
     #---- Define function [linear (continuum) + lorentz (feature)]
     #     I don't know where the factor 10 I need to apply to A() comes from.
@@ -106,11 +116,11 @@ def rmfeature (inspec, outspec, params=None, profile='voigt'):
     #---- Non-linear least square fit (optimize.leastsq)
     if (params==None):
         if profile=='voigt':    # Get initial params from Lorentz fit.
-            nlfit(contlorentz, [cte, m, A, mu, fwhmL], linedata[1], x=linedata[0])
-            nlfit(contvoigt, [cte, m, A, mu, fwhmD, fwhmL], linedata[1], x=linedata[0]) 
+            ft.nlfit(contlorentz, [cte, m, A, mu, fwhmL], linedata[1], x=linedata[0])
+            ft.nlfit(contvoigt, [cte, m, A, mu, fwhmD, fwhmL], linedata[1], x=linedata[0]) 
         elif profile=='lorentz':
-            nlfit(contlorentz, [cte, m, A, mu, fwhmL], linedata[1], x=linedata[0])
-            fwhmD=Parameter(None)
+            ft.nlfit(contlorentz, [cte, m, A, mu, fwhmL], linedata[1], x=linedata[0])
+            fwhmD=ft.Parameter(None)
     else:
         pass
 
@@ -119,11 +129,11 @@ def rmfeature (inspec, outspec, params=None, profile='voigt'):
     #     Then remove the feature
 
     if profile=='voigt':
-        newspecdata = specdata - voigt(arange(0,specdata.shape[0],1))
-        bestfit = contvoigt(arange(0,specdata.shape[0],1))
+        newspecdata = specdata - voigt(np.arange(0,specdata.shape[0],1))
+        bestfit = contvoigt(np.arange(0,specdata.shape[0],1))
     elif profile=='lorentz':
-        newspecdata = specdata - lorentz(arange(0,specdata.shape[0],1))
-        bestfit = contlorentz(arange(0,specdata.shape[0],1))
+        newspecdata = specdata - lorentz(np.arange(0,specdata.shape[0],1))
+        bestfit = contlorentz(np.arange(0,specdata.shape[0],1))
 
     #---- display the original spectrum, the best fit and the
     #     new spectrum.  The feature should be gone
@@ -142,7 +152,7 @@ def rmfeature (inspec, outspec, params=None, profile='voigt'):
 
     #---- write output spectrum
     if write=='y':
-        spout = pyfits.open(inspec,'readonly')  # just to create copy of HDUList
+        spout = fits.open(inspec,'readonly')  # just to create copy of HDUList
         spout['SCI'].data = newspecdata
         spout.writeto(outspec, output_verify='ignore')
         #print ("Not implemented yet, but it isn't the app cool!")
@@ -151,9 +161,9 @@ def rmfeature (inspec, outspec, params=None, profile='voigt'):
 
 
 if __name__ == '__main__':
-    if size(sys.argv) == 3:
+    if len(sys.argv) == 3:
         rmfeature(sys.argv[1], sys.argv[2])
-    elif size(sys.argv) > 3:
+    elif len(sys.argv) > 3:
         params = sys.argv[3:size(sys.argv)]
         rmfeature(sys.argv[1], sys.argv[2], params=params)
     else:
