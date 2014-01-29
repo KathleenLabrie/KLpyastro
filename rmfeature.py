@@ -1,12 +1,8 @@
 import sys
 from math import pi
-#import pyfits
 from astropy.io import fits
-#from numarray import *
 import numpy as np
-#from pylab import *
 import matplotlib.pyplot as plt
-#import numarray.convolve._lineshape as ls
 import stsci.convolve._lineshape as ls
 
 # In KLpy
