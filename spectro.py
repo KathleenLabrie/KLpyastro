@@ -95,6 +95,30 @@ class Line:
         self.set_redshift(redshift)
     
     def set_obswlen(self, obswlen=None):
+        """
+        Set or calculate the observed wavelength.
+        
+        The observed wavelength for the line is set to the obswlen provided as
+        input.  If no input is given and the rest wavelength and redshift are
+        already set, then the observed wavelength will be calculated from those
+        instead.
+        
+        Parameters
+        ----------
+        obswlen : float or Quantity, optional
+            Observed wavelength.  If specified, that value will be used to set
+            the obswlen attribute.  If it is not specified as input, the method
+            will try to calculate it from the rest wavelength and the redshift,
+            if those are already set.
+        
+        Examples
+        --------
+        >>> myline = Line(restwlen=0.5876*u.micron, redshift=1.)
+        >>> myline.set_obswlen()
+        >>> myline.obswlen
+        <Quantity 1.1752 micron>
+
+        """
         if obswlen is None:
             if self.restwlen is not None and self.redshift is not None:
                 #apply the redshift to restwlen to get obswlen
@@ -103,6 +127,30 @@ class Line:
         return
     
     def set_restwlen(self, restwlen=None):
+        """
+        Set or calculate the restwlen wavelength.
+        
+        The rest wavelength for the line is set to the restwlen provided as
+        input.  If no input is given and the observed wavelength and redshift 
+        are already set, then the rest wavelength will be calculated from 
+        those instead.
+        
+        Parameters
+        ----------
+        restwlen : float or Quantity, optional
+            Rest wavelength.  If specified, that value will be used to set
+            the restwlen attribute.  If it is not specified as input, the 
+            method will try to calculate it from the observed wavelength 
+            and the redshift, if those are already set.
+        
+        Examples
+        --------
+        >>> myline = Line(obswlen=1.1752*u.micron, redshift=1.)
+        >>> myline.set_restwlen()
+        >>> myline.restwlen
+        <Quantity 0.5876*u.micron>
+
+        """        
         if restwlen is None:
             if self.obswlen is not None and self.redshift is not None:
                 #apply the redshift to obswlen to get restwlen
@@ -111,6 +159,30 @@ class Line:
         return
     
     def set_redshift(self, redshift=None):
+        """
+        Set or calculate the redshift.
+        
+        The redshift for the line is set to the redshift provided as
+        input.  If no input is given and the observed and rest wavelengths
+        are already set, then the redshift will be calculated from 
+        those instead.
+        
+        Parameters
+        ----------
+        redshift : float, optional
+            Redshift.  If specified, that value will be used to set
+            the redshift attribute.  If it is not specified as input, the 
+            method will try to calculate it from the observed and the
+            rest wavelengths, if those are already set.
+        
+        Examples
+        --------
+        >>> myline = Line(restwlen=0.5876*u.micron, obswlen=1.1752*u.micron)
+        >>> myline.set_redshift()
+        >>> myline.redshift
+        1.0
+
+        """        
         if redshift is None:
             if self.restwlen is not None and self.obswlen is not None:
                 # use the restwlen and obswlen to calculated the redshift
@@ -119,19 +191,66 @@ class Line:
         return
     
     def set_name(self, name):
+        """
+        Set the line name.
+        
+        Parameters
+        ----------
+        name : str
+            Name to assign to this line.
+        """
         self.name = name
         return
 
     def validate_wavelengths(self):
+        """
+        Check that the rest wavelength, observed wavelength, and redshift are
+        coherent with each others.
+        
+        If the rest and observed wavelength, and the redshift are set 
+        independently, it is possible that they would be incoherent with
+        each other, eg. the observed wavelength does not match the rest 
+        wavelength and the redshift.  This method will do a quick validation
+        of the three values, checking if they match.  If they don't, an
+        AssertionError is returned.
+        
+        Raises
+        ------
+        AssertionError
+            Raised if the attributes restwlen, obswlen, and redshift are not
+            coherent with each other.
+        """
         assert self.obswlen == (self.redshift + 1) * self.restwlen
 
 class Spectrum:
+    """
+    Class representing a spectrum.
+    
+    A 1-D spectrum is loaded from an FITS HDU.  Information about the pixels
+    and their values, and information about the WCS and units are obtained
+    directly from the HDU.
+    
+    Parameters
+    ----------
+    hdu : HDU
+        The FITS Header Data Unit, in other words, a FITS extension.  Those
+        can be obtained from an AstroData object or with pyfits/astropy.io.fits.
+    wunit : Unit, optional
+        The units for the wavelengths.  The Unit class comes from the
+        astropy.units module.  If it is not provided as an argument, the 
+        constructor will try to get the information from the headers, in
+        particular from the 'WAT1_001' keyword.
+    """
     def __init__(self, hdu, wunit=None):
         self.counts = self.get_counts_array_from_hdu(hdu)
         self.pix = self.get_pixel_array_from_hdu(hdu)
         self.wcs = self.get_wcs_from_hdu(hdu)
         self.wlen = self.apply_wcs_to_pixels()
         self.wunit = wunit
+        #print 'debug - Spectrum init - length counts:', self.counts.size
+        #print 'debug - Spectrum init - length pix:', self.pix.size
+        #print 'debug - Spectrum init - wcs:', self.wcs
+        #print 'debug - Spectrum init - length wlen:', self.wlen.size
         
         if self.wunit is None:
             self.wunit = self.get_wunit(hdu)
@@ -156,6 +275,7 @@ class Spectrum:
         return u.Unit(unit_str)
 
     def apply_wcs_to_pixels(self):
+        #print 'debug - in apply_wcs_to_pixels:', zip(self.pix)[0:3]
         return self.wcs.wcs_pix2world(zip(self.pix), 0)
     
 
