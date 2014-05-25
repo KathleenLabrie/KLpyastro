@@ -70,6 +70,8 @@ def specplot(hdulist, spec_ext, annotations=None,
     # ----- Get the information needed to produce the plot
     
     # Get the spectrum.
+    #print 'debug - specplot - Extension parsed as:', get_valid_extension(spec_ext)
+    #print 'debug - specplot - The hdulist is:', hdulist.info()
     spectrum = spectro.Spectrum(hdulist[get_valid_extension(spec_ext)])
     
     # To simplify the rest of the scripts, create an instance of
