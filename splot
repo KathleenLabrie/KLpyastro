@@ -27,6 +27,9 @@ def parse_args():
     parser.add_argument('-x', '--extension', dest='extension', type=str, 
                     action='store', default='1', 
                     help='Extension of the science spectrum')
+    parser.add_argument('--variance', dest='var_ext', type=str,
+                    action='store', default=None,
+                    help='If specified, use this variance plane to plot error.')
     parser.add_argument('-t', '--title', dest='title', type=str, 
                     action='store', default='', help='Title for the plot')
     parser.add_argument('-l', '--linelist', dest='linelist', type=str, 
@@ -62,7 +65,7 @@ if __name__ == '__main__':
     if ARGS.linelist is not None:
         SP_ANNOTATIONS.set_line_list_name(ARGS.linelist)
         SP_ANNOTATIONS.set_redshift(ARGS.redshift)
-    specplot.specplot(ad.hdulist, ARGS.extension,
+    specplot.specplot(ad.hdulist, ARGS.extension, ARGS.var_ext,
             annotations=SP_ANNOTATIONS,
             ylimits=ARGS.ylim, output_plot_name=ARGS.output)
     plt.show(block=True)
