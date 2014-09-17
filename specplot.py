@@ -9,8 +9,9 @@ Utility function to plot a spectrum and annotate.
 
 import spectro
 import plottools
+import numpy as np
 
-def specplot(hdulist, spec_ext, annotations=None, 
+def specplot(hdulist, spec_ext, var_ext, annotations=None, 
              ylimits=None, output_plot_name=None):
     """
     Plot a 1-D spectrum and annotates.
@@ -73,6 +74,9 @@ def specplot(hdulist, spec_ext, annotations=None,
     #print 'debug - specplot - Extension parsed as:', get_valid_extension(spec_ext)
     #print 'debug - specplot - The hdulist is:', hdulist.info()
     spectrum = spectro.Spectrum(hdulist[get_valid_extension(spec_ext)])
+    if var_ext is not None:
+        error = spectro.Spectrum(hdulist[get_valid_extension(var_ext)])
+        error.counts = np.sqrt(error.counts)
     
     # To simplify the rest of the scripts, create an instance of
     # SpecPlotAnnotations that has everything set to False if no
@@ -97,6 +101,8 @@ def specplot(hdulist, spec_ext, annotations=None,
     # Plot the spectrum and set y-axis limits
     plot = plottools.SpPlot(title=annotations.title)
     plot.plot_spectrum(spectrum)
+    if var_ext is not None:
+        plot.plot_spectrum(error, color='g')
     if ylimits is not None:
         plot.adjust_ylimits(ylimits[0], ylimits[1])
     

@@ -56,7 +56,7 @@ class SpPlot(Plot):
     def __init__(self, title=None):
         Plot.__init__(self, title)
     
-    def plot_spectrum(self, sp1d, title=None):
+    def plot_spectrum(self, sp1d, title=None, color='k'):
         """
         Plot the spectrum (counts vs wavelength) with title and axis labels.
         
@@ -69,7 +69,7 @@ class SpPlot(Plot):
             self.set_title(title)
         self.set_axis_label(''.join(['Wavelength [', sp1d.wunit.name,']']), 'x')
         self.set_axis_label('Counts', 'y')
-        self.axplot.plot(sp1d.wlen, sp1d.counts, 'k')
+        self.axplot.plot(sp1d.wlen, sp1d.counts, color)
         self.axplot.axis('tight')
         self.fig.canvas.draw()
         return
