@@ -1,0 +1,3 @@
+#!/bin/sh
+
+python /Users/klabrie/local/lib/python2.7/site-packages/KLpy/pyredux/rmfeature.py $1 $2
