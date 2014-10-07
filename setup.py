@@ -58,9 +58,9 @@ setup(
       
       data_files = DATA_FILES,
       
-      #scripts = [
-      #           'klpyastro/...'
-      #           ],
+      scripts = [
+                 'klpyastro/scripts/rmfeature'
+                 ],
       
       zip_safe = False,
       )
