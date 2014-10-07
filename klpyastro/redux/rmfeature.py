@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 import stsci.convolve._lineshape as ls
 
 # In KLpy
-from KLpy.fitpy import fittools as ft
+#from KLpy.fitpy import fittools as ft
+from klpysci.fit import fittools as ft
 
 # Utility function to open and plot original spectrum
 def openNplot1d (filename, extname=('SCI',1)):
