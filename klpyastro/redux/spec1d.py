@@ -5,8 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import stsci.convolve._lineshape as ls
 
-# In KLpy
-#from KLpy.fitpy import fittools as ft
 from klpysci.fit import fittools as ft
 
 # Utility function to open and plot original spectrum
@@ -154,17 +152,6 @@ def rmfeature (inspec, outspec, params=None, profile='voigt'):
         spout.writeto(outspec, output_verify='ignore')
         #print ("Not implemented yet, but it isn't the app cool!")
     else:
-        print ("Too bad.")
-
-
-if __name__ == '__main__':
-    if len(sys.argv) == 3:
-        rmfeature(sys.argv[1], sys.argv[2])
-    elif len(sys.argv) > 3:
-        params = sys.argv[3:size(sys.argv)]
-        rmfeature(sys.argv[1], sys.argv[2], params=params)
-    else:
-        print "Usage: rmfeature in.fits out.fits <params>"
-        
+        print ("Too bad.")        
         
 
