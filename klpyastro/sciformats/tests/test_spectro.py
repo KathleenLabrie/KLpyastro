@@ -1,4 +1,5 @@
-import spectro
+import klpyastro
+from klpyastro.sciformats import spectro
 from astropy import units as u
 from astrodata import AstroData
 from astropy.io import fits as pf
@@ -200,9 +201,10 @@ class TestSpectrum:
     
     @classmethod
     def setup_class(cls):
-        testdir = os.path.dirname(os.path.abspath(__file__))
+        moduledir = os.path.dirname(os.path.abspath(klpyastro.__file__))
+        testdatadir = os.path.join(moduledir, 'data')
         
-        TestSpectrum.testfile = os.path.join(testdir, 'JHK.fits')
+        TestSpectrum.testfile = os.path.join(testdatadir, 'JHK.fits')
         TestSpectrum.wcs_string = "WCSAXES =                    1 / Number of coordinate axes                      CRPIX1  =                  1.0 / Pixel coordinate of reference point            PC1_1   =        6.57288848851 / Coordinate transformation matrix element       CDELT1  =                  1.0 / Coordinate increment at reference point        CTYPE1  = 'LINEAR'             / Coordinate type code                           CRVAL1  =        9719.45605469 / Coordinate value at reference point            LATPOLE =                 90.0 / [deg] Native latitude of celestial pole        RADESYS = 'FK5'                / Equatorial coordinate system                   MJD-OBS =        56580.1992188 / [d] MJD of observation matching DATE-OBS       DATE-OBS= '2013-10-15T04:46:52.500' / ISO-8601 observation date matching MJD-OBS"
 
     
