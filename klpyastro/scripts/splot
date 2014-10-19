@@ -8,8 +8,8 @@ lines we are interested in.
 """
 
 import argparse
-import specplot
-from spectro import LINELIST_DICT
+from klpyastro.plot import specplot
+from klpyastro.sciformats.spectro import LINELIST_DICT
 from astrodata import AstroData
 import matplotlib.pyplot as plt
 

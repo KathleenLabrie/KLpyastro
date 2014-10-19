@@ -7,8 +7,8 @@ Utility function to plot a spectrum and annotate.
 # (see matplotlib note in Evernote)
 # ID lines
 
-import spectro
-import plottools
+from klpyastro.sciformats import spectro
+from klpyastro.plot import plottools
 import numpy as np
 
 def specplot(hdulist, spec_ext, var_ext, annotations=None, 
