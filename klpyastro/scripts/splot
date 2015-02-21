@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+"""
+splot is a tool to plot 1-D spectra.  Not very general yet.
+It can be used to plot the reduced F2 longslit spectra from the
+GS-2013B-Q-73 program.  Given a redshift for the target and 
+'quasar' as the name of the line list, it will annoted the 
+lines we are interested in.
+"""
+
+import argparse
+from klpyastro.plot import specplot
+from klpyastro.sciformats.spectro import LINELIST_DICT
+from astrodata import AstroData
+import matplotlib.pyplot as plt
+
+VERSION = '0.1.1'
+
+VALID_LINE_LISTS = LINELIST_DICT.keys()
+
+def parse_args():
+    """
+    Parse command line arguments for splot
+    """
+    parser = argparse.ArgumentParser(description='Plot a 1-D spectrum')
+    parser.add_argument('spectrum', type=str, 
+                    help='File name of spectrum to plot')
+    parser.add_argument('-x', '--extension', dest='extension', type=str, 
+                    action='store', default='1', 
+                    help='Extension of the science spectrum')
+    parser.add_argument('--variance', dest='var_ext', type=str,
+                    action='store', default=None,
+                    help='If specified, use this variance plane to plot error.')
+    parser.add_argument('-t', '--title', dest='title', type=str, 
+                    action='store', default='', help='Title for the plot')
+    parser.add_argument('-l', '--linelist', dest='linelist', type=str, 
+                    action='store', default=None, choices=VALID_LINE_LISTS, 
+                    help='Name of the line list to use for annotation')
+    parser.add_argument('-z', '--redshift', dest='redshift', type=float,
+                    action='store', default=0.,
+                    help='Redshift to apply to the line list')
+    parser.add_argument('-y', '--ylim', dest='ylim', nargs=2, type=float,
+                    action='store', default=None, 
+                    help='Y-axis lower and upper limit')
+    parser.add_argument('-o', dest='output', type=str, action='store',
+                    default=None, 
+                    help='Name of the png output, with or without the .png\
+                    file extension.')
+    
+    parser.add_argument('-v', '--verbose', dest='verbose', 
+                    action='store_true', default=False, 
+                    help='Toggle on verbose mode')
+    parser.add_argument('--debug', action='store_true', default=False,
+                    help='Toggle on debug mode')
+            
+    if parser.parse_args().debug:
+        print parser.parse_args()
+    
+    return parser.parse_args()
+
+if __name__ == '__main__':
+    ARGS = parse_args()
+    
+    ad = AstroData(ARGS.spectrum)
+    SP_ANNOTATIONS = specplot.SpecPlotAnnotations(ARGS.title)
+    if ARGS.linelist is not None:
+        SP_ANNOTATIONS.set_line_list_name(ARGS.linelist)
+        SP_ANNOTATIONS.set_redshift(ARGS.redshift)
+    specplot.specplot(ad.hdulist, ARGS.extension, ARGS.var_ext,
+            annotations=SP_ANNOTATIONS,
+            ylimits=ARGS.ylim, output_plot_name=ARGS.output)
+    plt.show(block=True)
