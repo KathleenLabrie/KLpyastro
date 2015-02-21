@@ -11,51 +11,51 @@ import numpy as np
 import os.path
 
 class TestLine:
-    
+
     @classmethod
     def setup_class(cls):
         TestLine.line = spectro.Line(restwlen=1.282,
                                      obswlen=2.564,
                                      redshift=1.,
                                      name='Pa_beta')
-        TestLine.expected_result = [1.282,2.564,1.,'Pa_beta']
-    
+        TestLine.expected_result = [1.282, 2.564, 1., 'Pa_beta']
+
     @classmethod
     def teardown_class(cls):
         pass
-    
+
     def setup(self):
         TestLine.newline = spectro.Line(restwlen=1.282,
                                         obswlen=2.564,
                                         redshift=1.,
                                         name='Pa_beta')
-    
+
     def teardown(self):
         del TestLine.newline
-    
+
     def test_init1(self):
         # empty initialization
-        expected_result = [None,None,None,None]
+        expected_result = [None, None, None, None]
         line = spectro.Line()
-        result = [line.restwlen,line.obswlen,line.redshift,line.name]
+        result = [line.restwlen, line.obswlen, line.redshift, line.name]
         assert_list_equal(result, expected_result)
-    
+
     def test_init2(self):
         # full initialization
         expected_result = TestLine.expected_result
         line = spectro.Line(restwlen=1.282, obswlen=2.564,
                             redshift=1., name='Pa_beta')
-        result = [line.restwlen,line.obswlen,line.redshift,line.name]
-        assert_list_equal(result, expected_result)      
+        result = [line.restwlen, line.obswlen, line.redshift, line.name]
+        assert_list_equal(result, expected_result)
 
     def test_init3(self):
         # partial initialization
         expected_result = TestLine.expected_result
         line = spectro.Line(restwlen=1.282,
                             redshift=1., name='Pa_beta')
-        result = [line.restwlen,line.obswlen,line.redshift,line.name]
+        result = [line.restwlen, line.obswlen, line.redshift, line.name]
         assert_list_equal(result, expected_result)
-    
+
     def test_set_obswlen1(self):
         # no calculations, set by argument.
         expected_result = 3.
@@ -63,7 +63,7 @@ class TestLine:
         line.set_obswlen(3.)
         result = line.obswlen
         assert_equal(result, expected_result)
-    
+
     def test_set_obswlen2(self):
         # calculate
         expected_result = TestLine.line.obswlen
@@ -76,12 +76,12 @@ class TestLine:
     def test_set_obswlen3(self):
         # with Quantity objects
         expected_result = TestLine.line.obswlen * u.micron
-        line = spectro.Line(restwlen=1.282*u.micron,
+        line = spectro.Line(restwlen=1.282 * u.micron,
                             redshift=1., name='Pa_beta')
         line.set_obswlen()
         result = line.obswlen
         assert_equal(result, expected_result)
-        
+
     def test_set_restwlen1(self):
         # no calculations, set by argument.
         expected_result = 3.
@@ -89,7 +89,7 @@ class TestLine:
         line.set_restwlen(3.)
         result = line.restwlen
         assert_equal(result, expected_result)
-    
+
     def test_set_restwlen2(self):
         # calculate
         expected_result = TestLine.line.restwlen
@@ -106,7 +106,7 @@ class TestLine:
         line.set_redshift(3.)
         result = line.redshift
         assert_equal(result, expected_result)
-    
+
     def test_set_redshift2(self):
         # calculate
         expected_result = TestLine.line.redshift
@@ -125,7 +125,7 @@ class TestLine:
 
 
 class TestLineList:
-        
+
     @classmethod
     def setup_class(cls):
         TestLineList.quasar_rest = \
@@ -145,83 +145,83 @@ class TestLineList:
                   ('Pa_beta', 1.282 * u.micron),
                   ('Pa_alpha', 1.875 * u.micron)
                 ]
-    
+
     @classmethod
     def teardown_class(cls):
         pass
-    
+
     def setup(self):
         TestLineList.linelist = spectro.LineList('quasar')
-    
+
     def teardown(self):
         del TestLineList.linelist
-    
+
     def test_init(self):
         # setup init a LineList
-        
+
         # need to use list() to make a true copy, otherwise quasar_rest gets
         # extended when expected_result is.
         expected_result = list(TestLineList.quasar_rest)
         expected_result.extend(['quasar', 0.])
         result = []
         for line in TestLineList.linelist.lines:
-            result.append( (line.name, line.restwlen) )
+            result.append((line.name, line.restwlen))
         result.extend([TestLineList.linelist.name, TestLineList.linelist.redshift])
-        assert_list_equal(result,expected_result)
-    
+        assert_list_equal(result, expected_result)
+
     def test_get_lines_from_list(self):
         expected_result = TestLineList.quasar_rest
         result = []
         for line in TestLineList.linelist.lines:
-            result.append( (line.name, line.restwlen) )
-        assert_list_equal(result,expected_result)
-            
+            result.append((line.name, line.restwlen))
+        assert_list_equal(result, expected_result)
+
     def test_append_linelist(self):
         expected_results = list(TestLineList.quasar_rest)
         expected_results.extend(TestLineList.paschen_rest)
         TestLineList.linelist.append_linelist('paschen')
         result = []
         for line in TestLineList.linelist.lines:
-            result.append( (line.name, line.restwlen) )
-        assert_list_equal(result,expected_results)
-        
+            result.append((line.name, line.restwlen))
+        assert_list_equal(result, expected_results)
+
     def test_reapply_redshift(self):
         expected_result = []
         for (name, wlen) in TestLineList.quasar_rest:
-            expected_result.append((name, wlen*2))
-        TestLineList.linelist.redshift=1.
+            expected_result.append((name, wlen * 2))
+        TestLineList.linelist.redshift = 1.
         TestLineList.linelist.reapply_redshift()
         result = []
         for line in TestLineList.linelist.lines:
-            result.append( (line.name, line.obswlen) )
+            result.append((line.name, line.obswlen))
         assert_list_equal(result, expected_result)
-       
-    
+
+
 class TestSpectrum:
-    
+
     @classmethod
     def setup_class(cls):
         moduledir = os.path.dirname(os.path.abspath(klpyastro.__file__))
-        testdatadir = os.path.join(moduledir, 'data')
-        
+        testdatadir = os.path.join(moduledir, 'tests', 'data')
+
         TestSpectrum.testfile = os.path.join(testdatadir, 'JHK.fits')
         TestSpectrum.wcs_string = "WCSAXES =                    1 / Number of coordinate axes                      CRPIX1  =                  1.0 / Pixel coordinate of reference point            PC1_1   =        6.57288848851 / Coordinate transformation matrix element       CDELT1  =                  1.0 / Coordinate increment at reference point        CTYPE1  = 'LINEAR'             / Coordinate type code                           CRVAL1  =        9719.45605469 / Coordinate value at reference point            LATPOLE =                 90.0 / [deg] Native latitude of celestial pole        RADESYS = 'FK5'                / Equatorial coordinate system                   MJD-OBS =        56580.1992188 / [d] MJD of observation matching DATE-OBS       DATE-OBS= '2013-10-15T04:46:52.500' / ISO-8601 observation date matching MJD-OBS"
 
-    
+
     @classmethod
     def teardown_class(cls):
         pass
-    
+
     def setup(self):
         TestSpectrum.ad = AstroData(TestSpectrum.testfile)
-        TestSpectrum.adhdu = TestSpectrum.ad['SCI',1]
+        TestSpectrum.adhdu = TestSpectrum.ad['SCI', 1]
         TestSpectrum.apf = pf.open(TestSpectrum.testfile)
         TestSpectrum.apfhdu = TestSpectrum.apf[0]
-    
+
     def teardown(self):
         TestSpectrum.ad.close()
         TestSpectrum.apf.close()
-        
+
     def test_get_counts_array_from_hdu1(self):
         # test passing an ad
         expected_result = TestSpectrum.adhdu.data
@@ -235,7 +235,7 @@ class TestSpectrum:
         sp = spectro.Spectrum(TestSpectrum.apfhdu, wunit=u.Angstrom)
         result = sp.counts
         assert_array_equal(result, expected_result)
-            
+
     def test_get_pixel_array_from_hdu1(self):
         expected_result = np.arange(TestSpectrum.apfhdu.header['NAXIS1'])
         sp = spectro.Spectrum(TestSpectrum.adhdu, wunit=u.Angstrom)
@@ -247,19 +247,19 @@ class TestSpectrum:
         sp = spectro.Spectrum(TestSpectrum.apfhdu, wunit=u.Angstrom)
         result = sp.pix
         assert_array_equal(result, expected_result)
-    
+
     def test_get_wcs_from_hdu1(self):
         expected_result = TestSpectrum.wcs_string
         sp = spectro.Spectrum(TestSpectrum.adhdu, wunit=u.Angstrom)
         result = sp.wcs.wcs.to_header()
         assert_equal(result, expected_result)
-    
+
     def test_get_wcs_from_hdu2(self):
         expected_result = TestSpectrum.wcs_string
         sp = spectro.Spectrum(TestSpectrum.apfhdu, wunit=u.Angstrom)
         result = sp.wcs.wcs.to_header()
         assert_equal(result, expected_result)
-    
+
     def test_get_wunit1(self):
         expected_result = u.Angstrom
         sp = spectro.Spectrum(TestSpectrum.adhdu)
@@ -271,14 +271,13 @@ class TestSpectrum:
         sp = spectro.Spectrum(TestSpectrum.apfhdu)
         result = sp.wunit
         assert_equal(result, expected_result)
-    
+
     def test_apply_wcs_to_pixels(self):
         expected_result = [9719.456, 16292.345, 24981.703]
         sp = spectro.Spectrum(TestSpectrum.adhdu)
-        result = [sp.wlen[0],sp.wlen[1000],sp.wlen[-1]]
-        assert_almost_equal(result[0], expected_result[0],3)
-        assert_almost_equal(result[1], expected_result[1],3)
-        assert_almost_equal(result[2], expected_result[2],3)
+        result = [sp.wlen[0], sp.wlen[1000], sp.wlen[-1]]
+        assert_almost_equal(result[0], expected_result[0], 3)
+        assert_almost_equal(result[1], expected_result[1], 3)
+        assert_almost_equal(result[2], expected_result[2], 3)
 
 
-    
