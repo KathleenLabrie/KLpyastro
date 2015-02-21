@@ -60,7 +60,9 @@ setup(
 
       scripts=[
                  'klpyastro/scripts/rmfeature',
-                 'klpyastro/scripts/splot'
+                 'klpyastro/scripts/splot',
+                 'klpyastro/scripts/mkdirectories',
+                 'klpyastro/scripts/mktable_helper'
                  ],
 
       zip_safe=False,
