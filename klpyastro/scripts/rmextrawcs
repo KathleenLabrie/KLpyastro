@@ -1,0 +1,100 @@
+#!/usr/bin/env python
+"""
+Remove extra WCS leftover from an axis that no longer exists.
+
+Should not happen but it can, for example, the output of Gemini IRAF
+nsextract does a bad job at cleaning up the WCS.
+"""
+
+import sys
+import argparse
+from klpyastro.utils import hdrfixing
+from klpyastro.utils import bookkeeping
+from astrodata import AstroData
+
+VERSION = '0.1.0'
+
+SHORT_DESCRIPTION = 'Remove WCS for non-existent axis.'
+
+def parse_args(command_line_args):
+	"""
+	Parse command line arguments for rmextrawcs.
+	"""
+	parser = argparse.ArgumentParser(prog='rmextrawcs',
+						description=SHORT_DESCRIPTION)
+
+	# Required arguments
+	parser.add_argument('inputfiles', type=str, nargs='+',
+						action='store', default=None,
+						help='File name of the FITS file to correct.\
+						It will be overwritten unless an output file name \
+						is specified.')
+	parser.add_argument('axis', type=int,
+						action='store', default=None,
+						help='Phantom axis.')
+
+	# Optional arguments
+	parser.add_argument('-x', '--extensions', dest='extensions', type=str,
+						action='store', default=['sci,1'], nargs='*',
+						help="Extensions to correct. eg. 'sci,1'")
+	parser.add_argument('-o', '--output', dest='outfiles', type=str,
+						action='store', default=[], nargs='*',
+						help='Name of the output file.')
+
+	parser.add_argument('-v', '--verbose', dest='verbose',
+					action='store_true', default=False,
+					help='Toggle on verbose mode.')
+	parser.add_argument('--debug', dest='debug',
+					action='store_true', default=False,
+					help='Toggle on debug mode.')
+
+	args = parser.parse_args(command_line_args)
+
+	if args.debug:
+		print args
+
+	if args.outfiles:
+		if len(args.outfiles) != len(args.inputfiles):
+			errmsg = 'Number of output filenames does not match number of inputs.'
+			raise ValueError, errmsg
+
+	return args
+
+def main(argv=None):
+	if argv is None:
+		argv = sys.argv[1:]
+
+	args = parse_args(argv)
+
+	if args.outfiles:
+		readmode = 'readonly'
+	else:
+		readmode = 'update'
+
+	for input, output in map(None, args.inputfiles, args.outfiles):
+		if args.verbose:
+			print 'For file', input
+		ad = AstroData(input, mode=readmode)
+		hdr_list = []
+		for extstr in args.extensions:
+			valid_ext_id = bookkeeping.get_valid_extension(extstr)
+			hdr_list.append(ad.hdulist[valid_ext_id].header)
+			if args.verbose:
+				print '    Selected extension', valid_ext_id
+
+
+		for header in hdr_list:
+	 		hdrfixing.rm_extrawcs_hdr(header, args.axis, args.verbose)
+
+		if output:
+			ad.filename = output
+			if args.verbose:
+				print '    Writing fixed FITS to', output
+		else:
+			if args.verbose:
+				print '    Updating input file.'
+		ad.write()
+		ad.close()
+
+if __name__ == '__main__':
+	sys.exit(main())
