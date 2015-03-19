@@ -6,9 +6,9 @@ Bookkeeping functions to help reduce F2 data.
 def mkdirectories(program, targetname, obsdate, reduxdate, bands):
     """
     Create the directory structure organizing the reduction of data.
-    Can process only one target and obsdate/reduxdate combination 
+    Can process only one target and obsdate/reduxdate combination
     at a time.  Multiple bands is okay.
-    
+
     :param program: Program name, eg. GS-2013B-Q-73
     :type program: str
     :parma targetname: Target name, eg. SDSSJ011758.83+002021.4
@@ -24,13 +24,13 @@ def mkdirectories(program, targetname, obsdate, reduxdate, bands):
 
     import os
     import os.path
-    
+
     rootdir = os.getcwd()
-    
+
     # Program # directory
     if not os.path.exists(program):
         os.makedirs(program)
-    
+
     #-----
     os.chdir(program)
 
@@ -40,10 +40,10 @@ def mkdirectories(program, targetname, obsdate, reduxdate, bands):
     # Target directory
     if not os.path.exists(targetname):
         os.makedirs(targetname)
-    
+
     #-----
     os.chdir(targetname)
-    
+
     # sciproducts directory
     if not os.path.exists('sciproducts'):
         os.makedirs('sciproducts')
@@ -51,25 +51,25 @@ def mkdirectories(program, targetname, obsdate, reduxdate, bands):
     datedir = '-'.join([obsdate, reduxdate])
     if not os.path.exists(datedir):
         os.makedirs(datedir)
-    
+
     #-----
     os.chdir(datedir)
-    
+
     # redux directories
     for band in bands:
         reduxdir = ''.join(['redux', band])
         if not os.path.exists(reduxdir):
             os.makedirs(reduxdir)
-    
+
     # README file
     if not os.path.exists('README'):
         write_readme_template()
-    
+
     # Possibly create and add the redux scripts once the tool
     # has been created.
-    
+
     os.chdir(rootdir)
-    
+
     return
 
 
@@ -77,7 +77,7 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
     """
     Create or append to an observation summary table.
     This function is interactive and requires input from the users.
-    
+
     :param tablename: Filename for the table.  If it exists it will
         be extended.
     :type tablename: str
@@ -92,7 +92,7 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
     import os.path
     if auto:
         from astrodata import AstroData
-        
+
     # Create an ObsTable.  If the file already exists on disk,
     # then read it.  Otherwise, leave it empty.
     # Error handling: If the file exists but there's an read error,
@@ -107,19 +107,19 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
             raise
         else:
             print "New table will be created."
-    
+
     # Start the prompting the user and the data for the information
     # that needs to go in the table.
-    
+
     user_not_done = True
     while user_not_done:
         user_inputs = {}
         if auto:
             filename_not_known = True
-        
+
         # Get list of prompts for user or data supplied information.
         req_input_list = get_req_input_list()
-        
+
         # Loop through record elements
         for input_request in req_input_list:
             if (not input_request['in_hdr'] or not auto):
@@ -128,14 +128,14 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
                 if auto and input_request['id'] == 'targetname' and \
                     user_inputs.has_key('datatype') and \
                     user_inputs['datatype'] == 'Science':
-                    
+
                     input_value = query_header(ad, input_request['id'])
                 else:
                     # prompt the user
                     input_value = raw_input(input_request['prompt'])
 
                 user_inputs[input_request['id']] = input_value
-                
+
                 # Assume that the user has a brain.
                 # Probe only the first file in 'filerange' since all the
                 # files in 'filerange' should be similar.
@@ -153,38 +153,38 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
                         filename = os.path.join(rawdir, filename)
 
                         # open ad
-                        ad = AstroData(filename)                        
+                        ad = AstroData(filename)
                         filename_not_known = False
             else:
-                
+
                 # get value from header
                 input_value = query_header(ad, input_request['id'])
                 user_inputs[input_request['id']] = input_value
-        
+
         if auto:
             ad.close()
-                
+
         # Create record
         new_record = create_record(user_inputs)
-        
+
         # Append to table
         table.add_records_to_table(new_record)
-        
+
         # Prompt user: add another entry?
         answer = raw_input('Add another entry (y/n): ')
-        user_not_done = ((answer=='y') or False)
-    
+        user_not_done = ((answer == 'y') or False)
+
     # All the info is now in the ObsTable.
     # Write the ObsTable to disk and close everything, we're done.
     table.write_table()
     table.pretty_table()
-    
+
     return
 
-#def mkreduxscript(tablename, targetname, band, shorttarget,
+# def mkreduxscript(tablename, targetname, band, shorttarget,
 #                  rootname):
 #
-#    
+#
 #    return
 
 #--------------------
@@ -194,10 +194,10 @@ def get_req_input_list():
     Return a list of prompts to present to the user.  For each
     prompt, specify whether the info can be found in the header
     and assign an identifier.
-    
-    :rtype: list of dictionaries 
+
+    :rtype: list of dictionaries
     """
-    
+
     root_prompt = {'prompt': 'File root name (e.g. S201202012): ',
                    'in_hdr': False,
                    'id': 'rootname'}
@@ -230,8 +230,8 @@ def get_req_input_list():
     rdmode_prompt = {'prompt': 'Read mode (e.g. Faint, Bright): ',
                      'in_hdr': True,
                      'id': 'rdmode'}
-    return [root_prompt, filerange_prompt, 
-            applyto_prompt, datatype_prompt, target_prompt, band_prompt, 
+    return [root_prompt, filerange_prompt,
+            applyto_prompt, datatype_prompt, target_prompt, band_prompt,
             grism_prompt, exptime_prompt, lnrs_prompt,
             rdmode_prompt]
 
@@ -240,7 +240,7 @@ def query_header(ad, requested_input):
     Returns the header value associated with the 'requested_input'
     string.  The requested_input strings are defined in get_req_input_list(),
     and they correspond to columns in the observation summary table.
-    
+
     :param ad: AstroData object that contains the header information.
     :type ad: AstroData object
     :param requested_input: Information to retrieve from the header.  The
@@ -250,7 +250,7 @@ def query_header(ad, requested_input):
     :type requested_intput: str
     :rtype: str
     """
-    
+
     # warning: might not be efficient if the descriptor system is slow
     # might have to change to if-elif sequence.  (but it's kinda cool
     # looking this way.)
@@ -260,20 +260,20 @@ def query_header(ad, requested_input):
         'grism'      : ad.disperser(pretty=True).as_str(),
         'exptime'    : ad.exposure_time().as_float(),
         'lnrs'       : ad.phu_get_key_value('LNRS'),
-        'rdmode'     : ad.read_mode(pretty=True).as_str() 
+        'rdmode'     : ad.read_mode(pretty=True).as_str()
     }[requested_input]
-    
+
 def create_record(user_inputs):
     """
     Create a ObsRecord from the informations gathered from the users.
-    
+
     :param user_inputs: Dictionary with all the values (as strings) required
         to fully populate a ObsRecord object.
     :type user_inputs: dict
     :rtype: ObsRecord object
     """
     import obstable
-    
+
     record = obstable.ObsRecord()
     record.targetname = user_inputs['targetname']
     record.rootname = user_inputs['rootname']
@@ -285,19 +285,19 @@ def create_record(user_inputs):
     record.exptime = float(user_inputs['exptime'])
     record.lnrs = int(user_inputs['lnrs'])
     record.rdmode = user_inputs['rdmode']
-    
+
     return record
 
 def parse_filerange(filerange):
     """
-    Parse strings like this:  
+    Parse strings like this:
         210-214
         215
         216,217
         218-221,223-225
     and produce a list of integers corresponding to the range expressed
     in the string.
-    
+
     :param filerange: String representing a range of integers.
     :type filerange: str
     :rtype: list of int
@@ -315,7 +315,7 @@ def parse_filerange(filerange):
                 number += 1
         else:
             raise RuntimeError
-    
+
     return filenumbers
 
 def write_readme_template():
@@ -323,7 +323,7 @@ def write_readme_template():
     When creating a directory structure, create also a short README
     file in which the version numbers of the DR software will be stored.
     """
-    
+
     readme_file = open('README', 'w')
     readme_file.write("Reduced with\n")
     readme_file.write("  reduxF2LS-BELR  [hg #:sha / github sha]\n")
@@ -332,3 +332,45 @@ def write_readme_template():
     readme_file.write("QUICKLOOK ONLY - NOT SQ or FOR SCIENCE\n")
     readme_file.close()
     return
+
+def get_valid_extension(extension_string):
+    """
+    Convert an extension string into a tuple that can be used on an
+    hdulist.
+
+    Transform an extension string obtained from the command line into
+    a valid extension that can be used on an hdulist.  If the extension
+    string is just the extension version, convert that to an int.
+    If the extension string is 'extname,extver', split the string, store
+    in a tuple the extname in uppercase and the extver as an int.
+
+    Parameters
+    ----------
+    extension_string : str
+        An extension string obtained from the command line.  In such a
+        string, the extension version needs to be separated and converted
+        to an int.
+
+    Returns
+    _______
+    int or tuple
+        If the input is just the extension version, returns it as an int.
+        Otherwise, returns a two elements in the tuple with the first element
+        containing the extension name as an upper case str and the second
+        containing the extension version as an int.
+
+    Examples
+    --------
+    >>> get_valid_extension('sci,1')
+    ('SCI',1)
+    >>> get_valid_extension('1')
+    1
+    """
+    ext = extension_string.split(',')
+    if ext[0].isdigit():
+        valid_extension = int(ext[0])
+    else:
+        valid_extension = (ext[0].upper(), int(ext[1]))
+
+    return valid_extension
+
