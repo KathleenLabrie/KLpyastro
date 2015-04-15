@@ -7,7 +7,7 @@ import numpy as np
 from astropy import wcs
 from astropy import units as u
 
-class Line:
+class Line(object):
     """
     Class to represent a spectral line.
 
@@ -222,7 +222,7 @@ class Line:
         """
         assert self.obswlen == (self.redshift + 1) * self.restwlen
 
-class Spectrum:
+class Spectrum(object):
     """
     Class representing a spectrum.
 
@@ -294,7 +294,7 @@ class Spectrum:
         return self.wcs.wcs_pix2world(zip(self.pix), 0)
 
 
-class LineList:
+class LineList(object):
     """
     Create a list of Line objects from a line list defined in LINELIST_DICT.
 
@@ -447,20 +447,20 @@ class LineList:
 # pylint: disable=E1101
 #  This disable is to ignore the u.micron errors (dynamic loading)
 LINELIST_DICT = {
-    'quasar' : [  ('HeI', 0.5876 * u.micron),
-                  ('HeI', 1.083 * u.micron),
-                  ('H_alpha', 0.6563 * u.micron),
-                  ('Pa_epsilon', 0.9546 * u.micron),
-                  ('Pa_delta', 1.005 * u.micron),
-                  ('Pa_gamma', 1.094 * u.micron),
-                  ('Pa_beta', 1.282 * u.micron),
-                  ('Pa_alpha', 1.875 * u.micron)
+    'quasar' : [('HeI', 0.5876 * u.micron),
+                ('HeI', 1.083 * u.micron),
+                ('H_alpha', 0.6563 * u.micron),
+                ('Pa_epsilon', 0.9546 * u.micron),
+                ('Pa_delta', 1.005 * u.micron),
+                ('Pa_gamma', 1.094 * u.micron),
+                ('Pa_beta', 1.282 * u.micron),
+                ('Pa_alpha', 1.875 * u.micron)
                 ],
-    'paschen' : [ ('Pa_epsilon', 0.9546 * u.micron),
-                  ('Pa_delta', 1.005 * u.micron),
-                  ('Pa_gamma', 1.094 * u.micron),
-                  ('Pa_beta', 1.282 * u.micron),
-                  ('Pa_alpha', 1.875 * u.micron)
+    'paschen' : [('Pa_epsilon', 0.9546 * u.micron),
+                 ('Pa_delta', 1.005 * u.micron),
+                 ('Pa_gamma', 1.094 * u.micron),
+                 ('Pa_beta', 1.282 * u.micron),
+                 ('Pa_alpha', 1.875 * u.micron)
                 ]
     }
 
