@@ -72,7 +72,8 @@ def specplot(hdulist, spec_ext, var_ext, annotations=None,
     # ----- Get the information needed to produce the plot
 
     # Get the spectrum.
-    # print 'debug - specplot - Extension parsed as:', get_valid_extension(spec_ext)
+    # print 'debug - specplot - Extension parsed as:',
+    #    get_valid_extension(spec_ext)
     # print 'debug - specplot - The hdulist is:', hdulist.info()
     spectrum = spectro.Spectrum(hdulist[get_valid_extension(spec_ext)])
     if var_ext is not None:
@@ -93,7 +94,7 @@ def specplot(hdulist, spec_ext, var_ext, annotations=None,
     # Get the band limits.
     if annotations.draw_bands_limits:
         errmsg = 'Draw bands limits feature not implemented.'
-        raise NotImplementedError, errmsg
+        raise NotImplementedError(errmsg)
 #        bandlist = spectro.BandList(spectrum.wlen[0], spectrum.wlen[-1])
 
 
@@ -126,7 +127,7 @@ def specplot(hdulist, spec_ext, var_ext, annotations=None,
     return
 
 
-class SpecPlotAnnotations:
+class SpecPlotAnnotations(object):
     """
     A collection of information for the plot annotations.
 
@@ -192,7 +193,7 @@ class SpecPlotAnnotations:
         else:
             print 'ERROR: line_list_name \"%s\" invalid.' % (line_list_name)
             print 'ERROR: Valid lists are: ', spectro.LINELIST_DICT.keys()
-            raise KeyError, line_list_name
+            raise KeyError(line_list_name)
 
         return
 
@@ -226,7 +227,7 @@ def example():
     This is just an example.  Cut and paste that on the python prompt.
     It can also be run as specplot.example().
     """
-    import numpy as np
+    # import numpy as np
     import matplotlib.pyplot as plt
     from astropy import wcs
     from astrodata import AstroData

@@ -52,7 +52,7 @@ To extract the documentation and copy it somewhere useful, ::
    (from installed egg):
       <where_egg_is_located>/klpyastro-0.1.0dev1-py2.7.egg/klpyastro/getdocs.py
 
-will copy the documentation to /your/preferred/path/reduxGemini.
+will copy the documentation to /your/preferred/path/klpyastro.
 
 
 
