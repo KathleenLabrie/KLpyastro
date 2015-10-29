@@ -447,8 +447,25 @@ class LineList(object):
 # pylint: disable=E1101
 #  This disable is to ignore the u.micron errors (dynamic loading)
 LINELIST_DICT = {
-    'quasar' : [('HeI', 0.5876 * u.micron),
+    'quasar' : [('SiIV]', 1400.0 * u.angstrom),
+                # ('SiIV]_1393', 1393.755 * u.angstrom),
+                # ('SiIV]_1402', 1402.770 * u.angstrom),
+                ('CIV', 1549.0 * u.angstrom),
+                # ('CIV_1548', 1548.195 * u.angstrom),
+                # ('CIV_1550', 1550.770 * u.angstrom),
+                ('CIII]', 1909 * u.angstrom),
+                ('FeII_2382', 2382.765 * u.angstrom),
+                ('FeII_2600', 2600.173 * u.angstrom),
+                ('MgII', 2798.0 * u.angstrom),
+                # ('MgII_2796', 2796.352 * u.angstrom),
+                # ('MgII_2803', 2803.531 * u.angstrom),
+                ('[OIII]_4959', 4959.0 * u.angstrom),
+                ('[OIII]_5007', 5007.0 * u.angstrom),
+                ('HeI', 0.5876 * u.micron),
                 ('HeI', 1.083 * u.micron),
+                ('H_delta', 0.4101 * u.micron),
+                ('H_gamma', 0.4340 * u.micron),
+                ('H_beta', 0.4861 * u.micron),
                 ('H_alpha', 0.6563 * u.micron),
                 ('Pa_epsilon', 0.9546 * u.micron),
                 ('Pa_delta', 1.005 * u.micron),
@@ -461,7 +478,10 @@ LINELIST_DICT = {
                  ('Pa_gamma', 1.094 * u.micron),
                  ('Pa_beta', 1.282 * u.micron),
                  ('Pa_alpha', 1.875 * u.micron)
-                ]
+                ],
+    'lyman' :   [('Ly_gamma', 972.537 * u.angstrom),
+                 ('Ly_beta', 1025.722 * u.angstrom),
+                 ('Ly_alpha', 1215.670 * u.angstrom)]
     }
 
 # pylint: enable=E1101
