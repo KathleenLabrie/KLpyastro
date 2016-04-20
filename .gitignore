@@ -58,3 +58,8 @@ target/
 .pydevproject
 .settings
 
+# PyCharm
+.idea
+
+# Jenkins
+report.xml
