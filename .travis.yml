@@ -1,16 +1,36 @@
 language: python
 python:
-  - "2.6"
+  # We don't actually use the Travis Python, but this keeps it organized.
   - "2.7"
-  - "3.2"
-  - "3.3"
-  - "nightly"
+  - "3.5"
 # command to install dependencies
 install:
-  - "pip install ." 
-  - "pip install -r requirements.txt"
-# command t run tests
-script: py.test
+  # Install miniconda (makes for easier scipy installation)
+  - sudo apt-get update
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+
+  # set up environment and python dependencies
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION
+  - conda install -n test-environment numpy scipy astropy sphinx
+  - conda install -n test-environement matplotlib
+  - conda install -n test-environment pytest pytest-cov
+  - source activate test-environment
+  - pip install coveralls
+# command to run tests
+script: 
+  - python setup.py develop && py.test --cov=klpyastro
+after_success:
+  - coveralls
 branches:
   only:
     - master
