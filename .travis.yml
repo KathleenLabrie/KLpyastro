@@ -22,7 +22,7 @@ install:
   # set up environment and python dependencies
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION
   - conda install -n test-environment numpy scipy astropy sphinx
-  - conda install -n test-environement matplotlib
+  - conda install -n test-environment matplotlib
   - conda install -n test-environment pytest pytest-cov
   - source activate test-environment
   - pip install coveralls
