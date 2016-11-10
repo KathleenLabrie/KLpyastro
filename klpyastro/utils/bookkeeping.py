@@ -3,6 +3,7 @@
 Bookkeeping functions to help reduce F2 data.
 """
 
+
 def mkdirectories(program, targetname, obsdate, reduxdate, bands):
     """
     Create the directory structure organizing the reduction of data.
@@ -22,7 +23,6 @@ def mkdirectories(program, targetname, obsdate, reduxdate, bands):
     :type bands: list of str
     """
 
-    import os
     import os.path
 
     rootdir = os.getcwd()
@@ -31,7 +31,7 @@ def mkdirectories(program, targetname, obsdate, reduxdate, bands):
     if not os.path.exists(program):
         os.makedirs(program)
 
-    #-----
+    # -----
     os.chdir(program)
 
     # Raw directory
@@ -41,7 +41,7 @@ def mkdirectories(program, targetname, obsdate, reduxdate, bands):
     if not os.path.exists(targetname):
         os.makedirs(targetname)
 
-    #-----
+    # -----
     os.chdir(targetname)
 
     # sciproducts directory
@@ -52,7 +52,7 @@ def mkdirectories(program, targetname, obsdate, reduxdate, bands):
     if not os.path.exists(datedir):
         os.makedirs(datedir)
 
-    #-----
+    # -----
     os.chdir(datedir)
 
     # redux directories
@@ -88,8 +88,9 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
         [Default: "./"]
     :type rawdir: str
     """
-    import obstable
+    from klpyastro.utils import obstable
     import os.path
+    # TODO: change to new astrodata when ready
     if auto:
         from astrodata import AstroData
 
@@ -103,10 +104,10 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
         table.read_table()
     except IOError:
         if os.path.exists(tablename):
-            print "Error reading table %s\n" % tablename
+            print("Error reading table %s\n" % tablename)
             raise
         else:
-            print "New table will be created."
+            print("New table will be created.")
 
     # Start the prompting the user and the data for the information
     # that needs to go in the table.
@@ -122,17 +123,21 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
 
         # Loop through record elements
         for input_request in req_input_list:
-            if (not input_request['in_hdr'] or not auto):
+            if not input_request['in_hdr'] or not auto:
                 # if auto and this is a Science entry, get the targetname from
                 # the header.  If not Science, then you need to prompt user.
                 if auto and input_request['id'] == 'targetname' and \
-                    user_inputs.has_key('datatype') and \
-                    user_inputs['datatype'] == 'Science':
+                        'datatype' in user_inputs and \
+                                user_inputs['datatype'] == 'Science':
 
                     input_value = query_header(ad, input_request['id'])
                 else:
                     # prompt the user
-                    input_value = raw_input(input_request['prompt'])
+                    try:
+                        input = raw_input
+                    except NameError:
+                        pass
+                    input_value = input(input_request['prompt'])
 
                 user_inputs[input_request['id']] = input_value
 
@@ -144,12 +149,11 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
                 # and keep it open until we're done requesting inputs
                 # (instead of opening and closing it every time).
                 if auto and filename_not_known:
-                    if user_inputs.has_key('rootname') and \
-                       user_inputs.has_key('filerange'):
+                    if 'rootname' in user_inputs and 'filerange' in user_inputs:
                         # parse filerange, build filename (with rawdir path)
                         filenumbers = parse_filerange(user_inputs['filerange'])
                         filename = "%sS%04d.fits" % \
-                                (user_inputs['rootname'], filenumbers[0])
+                                   (user_inputs['rootname'], filenumbers[0])
                         filename = os.path.join(rawdir, filename)
 
                         # open ad
@@ -171,7 +175,11 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
         table.add_records_to_table(new_record)
 
         # Prompt user: add another entry?
-        answer = raw_input('Add another entry (y/n): ')
+        try:
+            input = raw_input
+        except NameError:
+            pass
+        answer = input('Add another entry (y/n): ')
         user_not_done = ((answer == 'y') or False)
 
     # All the info is now in the ObsTable.
@@ -187,7 +195,8 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
 #
 #    return
 
-#--------------------
+# --------------------
+
 
 def get_req_input_list():
     """
@@ -247,7 +256,7 @@ def query_header(ad, requested_input):
         valid strings correspond to the 'id' in the dictionaries returned
         by get_req_input_list().  Only the prompts with 'in_hdr'=True are
         valid.
-    :type requested_intput: str
+    :type requested_input: str
     :rtype: str
     """
 
@@ -272,7 +281,7 @@ def create_record(user_inputs):
     :type user_inputs: dict
     :rtype: ObsRecord object
     """
-    import obstable
+    from klpyastro.utils import obstable
 
     record = obstable.ObsRecord()
     record.targetname = user_inputs['targetname']
@@ -287,6 +296,7 @@ def create_record(user_inputs):
     record.rdmode = user_inputs['rdmode']
 
     return record
+
 
 def parse_filerange(filerange):
     """
@@ -318,6 +328,7 @@ def parse_filerange(filerange):
 
     return filenumbers
 
+
 def write_readme_template():
     """
     When creating a directory structure, create also a short README
@@ -332,6 +343,7 @@ def write_readme_template():
     readme_file.write("QUICKLOOK ONLY - NOT SQ or FOR SCIENCE\n")
     readme_file.close()
     return
+
 
 def get_valid_extension(extension_string):
     """
@@ -352,7 +364,7 @@ def get_valid_extension(extension_string):
         to an int.
 
     Returns
-    _______
+    -------
     int or tuple
         If the input is just the extension version, returns it as an int.
         Otherwise, returns a two elements in the tuple with the first element
@@ -373,4 +385,3 @@ def get_valid_extension(extension_string):
         valid_extension = (ext[0].upper(), int(ext[1]))
 
     return valid_extension
-

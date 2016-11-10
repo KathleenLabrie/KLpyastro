@@ -2,10 +2,12 @@
 """
 Classes and definitions related to spectroscopic data.
 """
+from __future__ import print_function
 
 import numpy as np
 from astropy import wcs
 from astropy import units as u
+
 
 class Line(object):
     """
@@ -222,6 +224,7 @@ class Line(object):
         """
         assert self.obswlen == (self.redshift + 1) * self.restwlen
 
+
 class Spectrum(object):
     """
     Class representing a spectrum.
@@ -250,10 +253,10 @@ class Spectrum(object):
             raise
         self.wlen = self.apply_wcs_to_pixels()
         self.wunit = wunit
-        # print 'debug - Spectrum init - length counts:', self.counts.size
-        # print 'debug - Spectrum init - length pix:', self.pix.size
-        # print 'debug - Spectrum init - wcs:', self.wcs
-        # print 'debug - Spectrum init - length wlen:', self.wlen.size
+        # print('debug - Spectrum init - length counts:', self.counts.size)
+        # print('debug - Spectrum init - length pix:', self.pix.size)
+        # print('debug - Spectrum init - wcs:', self.wcs)
+        # print('debug - Spectrum init - length wlen:', self.wlen.size)
 
         if self.wunit is None:
             self.wunit = self.get_wunit(hdu)
@@ -276,9 +279,10 @@ class Spectrum(object):
         warnings.simplefilter('ignore')
         wcs_from_hdu = wcs.WCS(hdu.header.tostring())
         warnings.resetwarnings()
-
         if wcs_from_hdu.wcs.naxis != hdu.header['NAXIS']:
-            msg = 'WCS and pixel array have different dimensions'
+            msg = 'WCS and pixel array have different dimensions.\n'
+            msg += 'WCS has ' + str(wcs_from_hdu.wcs.naxis) + \
+                   ' axes, the array has ' + str(hdu.header["NAXIS"]) + ' axes.'
             raise wcs.InvalidCoordinateError(msg)
         return wcs_from_hdu
 
@@ -290,7 +294,6 @@ class Spectrum(object):
         return u.Unit(unit_str)
 
     def apply_wcs_to_pixels(self):
-        # print 'debug - in apply_wcs_to_pixels:', zip(self.pix)[0:3]
         return self.wcs.wcs_pix2world(zip(self.pix), 0)
 
 
@@ -393,8 +396,8 @@ class LineList(object):
                             name=line_data[0])
                 lines.append(line)
         except KeyError:
-            print 'ERROR: Line list name, "%s", invalid.' % (name)
-            print 'ERROR: Valid lists are:', LINELIST_DICT.keys()
+            print('ERROR: Line list name, "%s", invalid.' % (name))
+            print('ERROR: Valid lists are:', LINELIST_DICT.keys())
             raise
 
         return lines

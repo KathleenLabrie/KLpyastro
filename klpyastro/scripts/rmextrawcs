@@ -5,12 +5,14 @@ Remove extra WCS leftover from an axis that no longer exists.
 Should not happen but it can, for example, the output of Gemini IRAF
 nsextract does a bad job at cleaning up the WCS.
 """
+from __future__ import print_function
 
 import sys
 import argparse
+from astropy.io import fits
+
 from klpyastro.utils import hdrfixing
 from klpyastro.utils import bookkeeping
-from astropy.io import fits
 
 VERSION = '0.1.0'
 
@@ -52,12 +54,13 @@ def parse_args(command_line_args):
     args = parser.parse_args(command_line_args)
 
     if args.debug:
-        print args
+        print(args)
 
     if args.outfiles:
         if len(args.outfiles) != len(args.inputfiles):
-            errmsg = 'Number of output filenames does not match number of inputs.'
-            raise ValueError, errmsg
+            errmsg = \
+                'Number of output filenames does not match number of inputs.'
+            raise ValueError(errmsg)
 
     return args
 
@@ -73,28 +76,29 @@ def main(argv=None):
     else:
         readmode = 'update'
 
-    for input, output in map(None, args.inputfiles, args.outfiles):
+    for inputf, outputf in map(None, args.inputfiles, args.outfiles):
         if args.verbose:
-            print 'For file', input
-        hdulist = fits.open(input, mode=readmode)
+            print('For file', inputf)
+        hdulist = fits.open(inputf, mode=readmode)
         hdr_list = []
+        hdr_list.append(hdulist[0].header)
         for extstr in args.extensions:
             valid_ext_id = bookkeeping.get_valid_extension(extstr)
             hdr_list.append(hdulist[valid_ext_id].header)
             if args.verbose:
-                print '    Selected extension', valid_ext_id
+                print('    Selected extension', valid_ext_id)
 
         for header in hdr_list:
             hdrfixing.rm_extrawcs_hdr(header, args.axis, args.verbose)
 
-        if output:
-            hdulist.writeto(output)
+        if outputf:
+            hdulist.writeto(outputf)
             if args.verbose:
-                print '    Writing fixed FITS to', output
+                print('    Writing fixed FITS to', outputf)
         else:
             hdulist.flush()
             if args.verbose:
-                print '    Updating input file.'
+                print('    Updating input file.')
         hdulist.close()
 
 

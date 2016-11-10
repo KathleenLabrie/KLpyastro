@@ -10,6 +10,7 @@ from numpy.testing import assert_array_equal
 import numpy as np
 import os.path
 
+
 class TestLine:
 
     @classmethod
@@ -129,8 +130,19 @@ class TestLineList:
     @classmethod
     def setup_class(cls):
         TestLineList.quasar_rest = \
-                [ ('HeI', 0.5876 * u.micron),
+                [ ('SiIV]', 1400.0 * u.angstrom),
+                  ('CIV', 1549.0 * u.angstrom),
+                  ('CIII]', 1909 * u.angstrom),
+                  ('FeII_2382', 2382.765 * u.angstrom),
+                  ('FeII_2600', 2600.173 * u.angstrom),
+                  ('MgII', 2798.0 * u.angstrom),
+                  ('[OIII]_4959', 4959.0 * u.angstrom),
+                  ('[OIII]_5007', 5007.0 * u.angstrom),
+                  ('HeI', 0.5876 * u.micron),
                   ('HeI', 1.083 * u.micron),
+                  ('H_delta', 0.4101 * u.micron),
+                  ('H_gamma', 0.4340 * u.micron),
+                  ('H_beta', 0.4861 * u.micron),
                   ('H_alpha', 0.6563 * u.micron),
                   ('Pa_epsilon', 0.9546 * u.micron),
                   ('Pa_delta', 1.005 * u.micron),
@@ -205,8 +217,7 @@ class TestSpectrum:
         testdatadir = os.path.join(moduledir, 'tests', 'data')
 
         TestSpectrum.testfile = os.path.join(testdatadir, 'JHK.fits')
-        TestSpectrum.wcs_string = "WCSAXES =                    1 / Number of coordinate axes                      CRPIX1  =                  1.0 / Pixel coordinate of reference point            PC1_1   =        6.57288848851 / Coordinate transformation matrix element       CDELT1  =                  1.0 / Coordinate increment at reference point        CTYPE1  = 'LINEAR'             / Coordinate type code                           CRVAL1  =        9719.45605469 / Coordinate value at reference point            LATPOLE =                 90.0 / [deg] Native latitude of celestial pole        RADESYS = 'FK5'                / Equatorial coordinate system                   MJD-OBS =        56580.1992188 / [d] MJD of observation matching DATE-OBS       DATE-OBS= '2013-10-15T04:46:52.500' / ISO-8601 observation date matching MJD-OBS"
-
+        TestSpectrum.wcs_string = "WCSAXES =                    1 / Number of coordinate axes                      CRPIX1  =                  1.0 / Pixel coordinate of reference point            PC1_1   =     6.57288848850671 / Coordinate transformation matrix element       CDELT1  =                  1.0 / Coordinate increment at reference point        CTYPE1  = 'LINEAR'             / Coordinate type code                           CRVAL1  =     9719.45605468751 / Coordinate value at reference point            LATPOLE =                 90.0 / [deg] Native latitude of celestial pole        MJD-OBS =        56580.1992188 / [d] MJD of observation matching DATE-OBS       DATE-OBS= '2013-10-15T04:46:52.500' / ISO-8601 observation date matching MJD-OBS                                                                                COMMENT  WCS header keyrecords produced by WCSLIB 5.14                          "
 
     @classmethod
     def teardown_class(cls):

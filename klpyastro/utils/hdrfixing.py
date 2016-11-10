@@ -3,6 +3,8 @@
 Collection of functions to fix various problems in the
 fits headers.
 """
+from __future__ import print_function
+
 
 def rm_extrawcs_hdr(hdr, baddim, verbose=False):
     """
@@ -32,15 +34,17 @@ def rm_extrawcs_hdr(hdr, baddim, verbose=False):
     cdx_x = 'CD' + str(baddim) + '_' + str(baddim)
     ctypex = 'CTYPE' + str(baddim)
     ltmx_x = 'LTM' + str(baddim) + '_' + str(baddim)
+    watx = 'WAT' + str(baddim) + '_' + '*'
 
-    keywords_to_remove = [cdx_x, ctypex, ltmx_x]
+    keywords_to_remove = [cdx_x, ctypex, ltmx_x, watx]
     for keyword in keywords_to_remove:
         try:
-            hdr.remove(keyword)
+            # hdr.remove(keyword)
+            del hdr[keyword]
             if verbose:
-                print 'Removing ', keyword
-        except ValueError, e:
-            print e
-            print '    Nothing to fix.'
+                print('Removing ', keyword)
+        except KeyError as err:
+            print(err)
+            print('    Nothing to fix.')
 
     return

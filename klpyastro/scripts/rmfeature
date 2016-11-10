@@ -12,54 +12,56 @@ from klpyastro.redux import spec1d
 
 SHORT_DESCRIPTION = 'Remove stellar features by function fitting.'
 
+
 def parse_args(command_line_args):
-	"""
-	Parse command line arguments for rmfeature.
-	"""
+    """
+    Parse command line arguments for rmfeature.
+    """
 
-	parser = argparse.ArgumentParser(prog='rmfeature',
-									description=SHORT_DESCRIPTION)
+    parser = argparse.ArgumentParser(prog='rmfeature',
+                                     description=SHORT_DESCRIPTION)
 
-	# Required arguments
-	parser.add_argument('inputspec', action='store', nargs=1,
-						type=str, default=None,
-						help='File name of the input 1-D spectrum')
-	parser.add_argument('outputspec', action='store', nargs=1,
-						type=str, default=None,
-						help='File name of the output 1-D spectrum')
+    # Required arguments
+    parser.add_argument('inputspec', action='store', nargs=1,
+                        type=str, default=None,
+                        help='File name of the input 1-D spectrum')
+    parser.add_argument('outputspec', action='store', nargs=1,
+                        type=str, default=None,
+                        help='File name of the output 1-D spectrum')
 
-	# Optional arguments
-	parser.add_argument('--init', dest='coeff', action='store', nargs=6,
-						type=float, default=None,
-						help='Manually set the initial condition for the fit.\
-							[cte, m, A, mu, fwhmL, fwhmD]')
-	parser.add_argument('--profile', dest='profile', action='store', nargs=1,
-						type=str, default='voigt',
-						help='Profile to fit to the stellar features.  \
-						    Default: voigt')
+    # Optional arguments
+    parser.add_argument('--init', dest='coeff', action='store', nargs=6,
+                        type=float, default=None,
+                        help='Manually set the initial condition for the fit.'
+                             '[cte, m, A, mu, fwhmL, fwhmD]')
+    parser.add_argument('--profile', dest='profile', action='store', nargs=1,
+                        type=str, default='voigt',
+                        help='Profile to fit to the stellar features.  '
+                             'Default: voigt')
 
-	parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
- 						default=False,
-						help='Toggle on verbose mode.')
-	parser.add_argument('--debug', dest='debug', action='store_true',
-						default=False,
-						help='Toggle on debug mode.')
+    parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
+                        default=False,
+                        help='Toggle on verbose mode.')
+    parser.add_argument('--debug', dest='debug', action='store_true',
+                        default=False,
+                        help='Toggle on debug mode.')
 
-	args = parser.parse_args(command_line_args)
+    args = parser.parse_args(command_line_args)
 
-	if args.debug:
-		print args
+    if args.debug:
+        print(args)
 
-	return args
+    return args
+
 
 def main(argv=None):
-	if argv is None:
-		argv = sys.argv[1:]
+    if argv is None:
+        argv = sys.argv[1:]
 
-	args = parse_args(argv)
+    args = parse_args(argv)
 
-	spec1d.rmfeature(args.inputspec[0], args.outputspec[0],
-					    args.coeff, args.profile)
+    spec1d.rmfeature(args.inputspec[0], args.outputspec[0],
+                     args.coeff, args.profile)
 
 if __name__ == '__main__':
     sys.exit(main())

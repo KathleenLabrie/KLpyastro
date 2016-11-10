@@ -1,36 +1,36 @@
 import os
 import os.path
-import bookkeeping
+from klpyastro.utils import bookkeeping
 from nose.tools import assert_list_equal
 from nose.tools import assert_dict_equal
 from astrodata import AstroData
 
 class TestBookkeeping:
-    
+
     @classmethod
     def setup_class(cls):
-        TestBookkeeping.f2sciencefile=os.path.join('tests','S20131002S0046.fits')
-        TestBookkeeping.f2darkfile=os.path.join('tests','S20131002S0217.fits')
-        TestBookkeeping.f2flatfile=os.path.join('tests','S20131002S0055.fits')
-        TestBookkeeping.f2arcfile=os.path.join('tests','S20131002S0054.fits')
-   
+        TestBookkeeping.f2sciencefile=os.path.join('klpyastro','utils','tests','S20131002S0046.fits')
+        TestBookkeeping.f2darkfile=os.path.join('klpyastro','utils','tests','S20131002S0217.fits')
+        TestBookkeeping.f2flatfile=os.path.join('klpyastro','utils','tests','S20131002S0055.fits')
+        TestBookkeeping.f2arcfile=os.path.join('klpyastro','utils','tests','S20131002S0054.fits')
+
     @classmethod
     def teardown_class(cls):
         pass
-    
+
     def setup(self):
         pass
-    
+
     def teardown(self):
         pass
-    
+
     def test_query_header1(self):
         expected_result = { #'targetname':'SDSSJ022721.25-010445.8',
                             'band':'JH',
                             'grism':'JH',
                             'exptime':90.,
                             'lnrs': 6,
-                            'rdmode': 'Faint'
+                            'rdmode': '6'
                            }
         ad = AstroData(TestBookkeeping.f2sciencefile)
         result = {}
@@ -47,7 +47,7 @@ class TestBookkeeping:
                             'grism':'Open',
                             'exptime':8.,
                             'lnrs': 1,
-                            'rdmode': 'Bright'
+                            'rdmode': '1'
                            }
         ad = AstroData(TestBookkeeping.f2darkfile)
         result = {}
@@ -63,7 +63,7 @@ class TestBookkeeping:
                             'grism':'JH',
                             'exptime':8.,
                             'lnrs': 1,
-                            'rdmode': 'Bright'
+                            'rdmode': '1'
                            }
         ad = AstroData(TestBookkeeping.f2flatfile)
         result = {}
@@ -73,13 +73,13 @@ class TestBookkeeping:
         result['lnrs'] = bookkeeping.query_header(ad, 'lnrs')
         result['rdmode'] = bookkeeping.query_header(ad, 'rdmode')
         assert_dict_equal(result, expected_result)
-    
+
     def test_query_header4(self):
         expected_result = { 'band':'JH',
                             'grism':'JH',
                             'exptime':30.,
                             'lnrs': 6,
-                            'rdmode': 'Faint'
+                            'rdmode': '6'
                            }
         ad = AstroData(TestBookkeeping.f2arcfile)
         result = {}
@@ -92,7 +92,7 @@ class TestBookkeeping:
 
     def test_create_record(self):
         pass
-    
+
     def test_parse_filerange(self):
         filerange1 = '210-214'
         filerange2 = '215'
@@ -106,16 +106,16 @@ class TestBookkeeping:
         result.extend(bookkeeping.parse_filerange(filerange3))
         result.extend(bookkeeping.parse_filerange(filerange4))
         result.extend(bookkeeping.parse_filerange(filerange5))
-        
+
         assert_list_equal(result,expected_result)
-    
+
     #@attr('interactive')
     def test_mktable_helper(self):
         pass
-    
+
     def test_mkdirectories(self):
         import shutil
-        
+
         program='GS-2013-Q-73'
         targetname='SDSSJ022721.25-010445.8'
         obsdate='20131002'
@@ -128,5 +128,4 @@ class TestBookkeeping:
         for dirstruct in os.walk(program):
             result.append(dirstruct)
         shutil.rmtree(program)
-        assert_list_equal(result, expected_result)   
-        
+        assert_list_equal(result, expected_result)

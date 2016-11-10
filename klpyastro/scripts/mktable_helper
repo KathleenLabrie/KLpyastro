@@ -22,6 +22,7 @@ from klpyastro.utils.bookkeeping import mktable_helper
 
 VERSION = '1.0.1'
 
+
 def parse_args():
     """
     Parse command line arguments.
@@ -40,14 +41,14 @@ def parse_args():
                         default=False, help='Toggle on debug mode')
 
     if parser.parse_args().debug:
-        print parser.parse_args()
-        print parser.parse_args().tablename
-        print parser.parse_args().auto
-        print parser.parse_args().rawdir
+        print(parser.parse_args())
+        print(parser.parse_args().tablename)
+        print(parser.parse_args().auto)
+        print(parser.parse_args().rawdir)
 
-    return parser.parse_args
+    return parser.parse_args()
 
 if __name__ == '__main__':
-    ARGS = parse_args()
-    mktable_helper(ARGS.tablename, auto=ARGS.auto,
-                rawdir=ARGS.rawdir)
+    args = parse_args()
+    mktable_helper(args.tablename, auto=args.auto,
+                   rawdir=args.rawdir)

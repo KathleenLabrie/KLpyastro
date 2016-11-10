@@ -38,6 +38,10 @@ def specplot(hdulist, spec_ext, var_ext, annotations=None,
         The extension that contains the spectrum.  The extension identifier
         can be an int or a string representation with extname and extver,
         eg. 'sci,1'.
+    var_ext : int or str
+        The extension that contains the variance.  The extension identifier
+        can be an int or a string representation with extname and extver,
+        eg. 'var,1'.
     annotations : SpecPlotAnnotation, optional
         An instance of SpecPlotAnnotation containing annotation information
         for plot, eg. title, line list names, redshift, whether to draw the
@@ -79,6 +83,8 @@ def specplot(hdulist, spec_ext, var_ext, annotations=None,
     if var_ext is not None:
         error = spectro.Spectrum(hdulist[get_valid_extension(var_ext)])
         error.counts = np.sqrt(error.counts)
+    else:
+        error = None
 
     # To simplify the rest of the scripts, create an instance of
     # SpecPlotAnnotations that has everything set to False if no
@@ -91,6 +97,9 @@ def specplot(hdulist, spec_ext, var_ext, annotations=None,
     if annotations.annotate_lines:
         linelist = spectro.LineList(annotations.line_list_name,
                                     annotations.redshift)
+    else:
+        linelist = None
+
     # Get the band limits.
     if annotations.draw_bands_limits:
         errmsg = 'Draw bands limits feature not implemented.'
@@ -103,17 +112,17 @@ def specplot(hdulist, spec_ext, var_ext, annotations=None,
     # Plot the spectrum and set y-axis limits
     plot = plottools.SpPlot(title=annotations.title)
     plot.plot_spectrum(spectrum)
-    if var_ext is not None:
+    if error is not None:
         plot.plot_spectrum(error, color='g')
     if ylimits is not None:
         plot.adjust_ylimits(ylimits[0], ylimits[1])
 
     # Annotate the lines.
-    if annotations.annotate_lines:
+    if linelist is not None:
         lines_to_plot = []
         for line in linelist.lines:
             lines_to_plot.append((line.obswlen.to(spectrum.wunit).value,
-                                   line.name))
+                                  line.name))
         plot.annotate_lines(lines_to_plot)
 
     # Draw the band limits
@@ -191,8 +200,9 @@ class SpecPlotAnnotations(object):
             self.line_list_name = line_list_name
             self.annotate_lines = True
         else:
-            print 'ERROR: line_list_name \"%s\" invalid.' % (line_list_name)
-            print 'ERROR: Valid lists are: ', spectro.LINELIST_DICT.keys()
+            print('ERROR: line_list_name "%s" invalid.' % line_list_name)
+            print('ERROR: Valid lists are: ',
+                                        list(spectro.LINELIST_DICT.keys()))
             raise KeyError(line_list_name)
 
         return
@@ -221,30 +231,30 @@ class SpecPlotAnnotations(object):
         self.title = title
         return
 
-
-def example():
-    """
-    This is just an example.  Cut and paste that on the python prompt.
-    It can also be run as specplot.example().
-    """
-    # import numpy as np
-    import matplotlib.pyplot as plt
-    from astropy import wcs
-    from astrodata import AstroData
-
-    ad = AstroData('JHK.fits')
-    x_values = np.arange(ad.get_key_value('NAXIS1'))
-
-    wcs_ad = wcs.WCS(ad.header.tostring())
-    wlen = wcs_ad.wcs_pix2world(zip(x_values), 0)
-
-    plt.plot(wlen, ad.data)
-    plt.xlabel('Wavelength [Angstrom]')
-    plt.ylabel('Counts')
-    plt.axis('tight')
-    plt.ylim(-100, 800)
-    plt.show()
-
-    ad.close()
-
-    # plt.axis[[-100,1000,ymin,ymax]]
+# TODO: reactivate once the new astrodata is available for Python 3
+# def example():
+#     """
+#     This is just an example.  Cut and paste that on the python prompt.
+#     It can also be run as specplot.example().
+#     """
+#     # import numpy as np
+#     import matplotlib.pyplot as plt
+#     from astropy import wcs
+#     from astrodata import AstroData
+#
+#     ad = AstroData('JHK.fits')
+#     x_values = np.arange(ad.get_key_value('NAXIS1'))
+#
+#     wcs_ad = wcs.WCS(ad.header.tostring())
+#     wlen = wcs_ad.wcs_pix2world(zip(x_values), 0)
+#
+#     plt.plot(wlen, ad.data)
+#     plt.xlabel('Wavelength [Angstrom]')
+#     plt.ylabel('Counts')
+#     plt.axis('tight')
+#     plt.ylim(-100, 800)
+#     plt.show()
+#
+#     ad.close()
+#
+#     # plt.axis[[-100,1000,ymin,ymax]]

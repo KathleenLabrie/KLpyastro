@@ -1,4 +1,5 @@
-import sys
+from __future__ import print_function
+
 from math import pi
 from astropy.io import fits
 import numpy as np
@@ -14,7 +15,7 @@ def openNplot1d (filename, extname=('SCI',1)):
     x = np.arange(sp.shape[0])
     plt.clf()
     plt.plot (x, sp)
-    
+
     return hdulist
 
 # Interactive specification of the section around the feature to work on
@@ -22,17 +23,17 @@ def getsubspec (sp):
     # here it should be graphical, but I'm still working on that
     x1 = input("Left edge pixel: ")
     x2 = input("Right edge pixel: ")
-    
+
     flux = sp[x1:x2]
     pixel = np.arange(x1,x2,1)
-    
+
     sub = np.zeros((2,flux.shape[0]))
     sub[0] = pixel
     sub[1] = flux
-    
+
     #plt.clf()
     #plt.plot (pixel, flux)
-    
+
     #input('continue')
 
     return sub
@@ -53,10 +54,10 @@ def rmfeature (inspec, outspec, params=None, profile='voigt'):
 
     #---- Get data for section around feature
     linedata = getsubspec(specdata)
-    
+
     #---- Calculate and set initial parameter from linedata
 
-    if params==None:
+    if params is None:
         contslope = (linedata[1][0] - linedata[1][-1]) / \
                     (linedata[0][0] - linedata[0][-1])
         contlevel = linedata[1][0] - (contslope * linedata[0][0])
@@ -112,14 +113,14 @@ def rmfeature (inspec, outspec, params=None, profile='voigt'):
     if (params==None):
         if profile=='voigt':    # Get initial params from Lorentz fit.
             ft.nlfit(contlorentz, [cte, m, A, mu, fwhmL], linedata[1], x=linedata[0])
-            ft.nlfit(contvoigt, [cte, m, A, mu, fwhmD, fwhmL], linedata[1], x=linedata[0]) 
+            ft.nlfit(contvoigt, [cte, m, A, mu, fwhmD, fwhmL], linedata[1], x=linedata[0])
         elif profile=='lorentz':
             ft.nlfit(contlorentz, [cte, m, A, mu, fwhmL], linedata[1], x=linedata[0])
             fwhmD=ft.Parameter(None)
     else:
         pass
 
-    #---- retrieve line profile parameters only and create a profile 
+    #---- retrieve line profile parameters only and create a profile
     #     with zero continuum for the entire range for the original spectrum
     #     Then remove the feature
 
@@ -134,16 +135,20 @@ def rmfeature (inspec, outspec, params=None, profile='voigt'):
     #     new spectrum.  The feature should be gone
 
     plotresult(specdata, bestfit, newspecdata)
-    print "Best Fit Parameters:"
-    print " section = ",linedata[0][0],",",linedata[0][-1]+1
-    print "     cte = ",cte()
-    print "       m = ",m()
-    print "       A = ",A()
-    print "      mu = ",mu()
-    print "   fwhmL = ",fwhmL()
-    print "   fwhmD = ",fwhmD()
+    print("Best Fit Parameters:")
+    print(" section = ",linedata[0][0],",",linedata[0][-1]+1)
+    print("     cte = ",cte())
+    print("       m = ",m())
+    print("       A = ",A())
+    print("      mu = ",mu())
+    print("   fwhmL = ",fwhmL())
+    print("   fwhmD = ",fwhmD())
 
-    write = raw_input('Write corrected spectrum to '+outspec+'? (y/n): ')
+    try:
+        input = raw_input
+    except NameError:
+        pass
+    write = input('Write corrected spectrum to '+outspec+'? (y/n): ')
 
     #---- write output spectrum
     if write=='y':
@@ -152,6 +157,6 @@ def rmfeature (inspec, outspec, params=None, profile='voigt'):
         spout.writeto(outspec, output_verify='ignore')
         #print ("Not implemented yet, but it isn't the app cool!")
     else:
-        print ("Too bad.")        
-        
+        print("Too bad.")
+
 

@@ -1,4 +1,4 @@
-import obstable
+from klpyastro.utils import obstable
 from nose.tools import assert_list_equal
 from nose.tools import assert_equal
 from nose.tools import assert_raises
@@ -6,34 +6,34 @@ from nose.tools import assert_multi_line_equal
 import os.path
 
 class TestObsRecord:
-    
+
     @classmethod
     def setup_class(cls):
         TestObsRecord.asciiline = "SDSSJ000429.46-002142.8\tS20130719\tHK\tHK\tScience\t\tNone\t496-499\t\t90.0\t6\tfaint"
-        TestObsRecord.obsrecord = obstable.ObsRecord(targetname='SDSSJ000429.46-002142.8', 
-                                                     rootname='S20130719', 
-                                                     band='HK', grism='HK', 
-                                                     datatype='Science', applyto='None', 
+        TestObsRecord.obsrecord = obstable.ObsRecord(targetname='SDSSJ000429.46-002142.8',
+                                                     rootname='S20130719',
+                                                     band='HK', grism='HK',
+                                                     datatype='Science', applyto='None',
                                                      filerange='496-499', exptime=90,
                                                      lnrs=6, rdmode='faint')
-    
+
     @classmethod
     def teardown_class(cls):
         pass
-    
+
     def setup(self):
         pass
-    
+
     def teardown(self):
         pass
-        
+
     def test_print_record(self):
         expected_result = "%s" % (TestObsRecord.asciiline)
         result = TestObsRecord.obsrecord.print_record()
         assert_equal(result, expected_result)
-    
+
     def test_read_records(self):
-        expected_result = ['SDSSJ000429.46-002142.8', 'S20130719', 'HK', 'HK', 
+        expected_result = ['SDSSJ000429.46-002142.8', 'S20130719', 'HK', 'HK',
                            'Science', 'None', '496-499', 90, 6, 'faint']
         record = obstable.ObsRecord()
         record.read_record(TestObsRecord.asciiline)
@@ -43,25 +43,25 @@ class TestObsRecord:
         assert_list_equal(result, expected_result)
 
 
-class TestObsTable(): 
+class TestObsTable():
     @classmethod
     def setup_class(cls):
         testdir = os.path.dirname(os.path.abspath(__file__))
-        
+
         TestObsTable.pretty = os.path.join(testdir, 'prettytable.dat')
         TestObsTable.filename = 'testtable.dat'
-        TestObsTable.obsrecord = obstable.ObsRecord(targetname='SDSSJ000429.46-002142.8', 
-                                                     rootname='S20130719', 
-                                                     band='HK', grism='HK', 
-                                                     datatype='Science', applyto='None', 
+        TestObsTable.obsrecord = obstable.ObsRecord(targetname='SDSSJ000429.46-002142.8',
+                                                     rootname='S20130719',
+                                                     band='HK', grism='HK',
+                                                     datatype='Science', applyto='None',
                                                      filerange='496-499', exptime=90,
                                                      lnrs=6, rdmode='faint')
         TestObsTable.asciiline = "SDSSJ000429.46-002142.8\tS20130719\tHK\tHK\tScience\t\tNone\t496-499\t\t90.0\t6\tfaint"
-    
+
     @classmethod
     def teardown_class(cls):
         pass
-    
+
     def setup(self):
         TestObsTable.obstable = obstable.ObsTable()
         try:
@@ -75,13 +75,13 @@ class TestObsTable():
         except IOError:
             raise
         table.close()
-   
+
     def teardown(self):
         import os
         del(TestObsTable.obstable)
         os.remove(TestObsTable.filename)
 
-    
+
     def test_add_records_to_table1(self):
         expected_result = [1,[TestObsTable.obsrecord]]
         TestObsTable.obstable.add_records_to_table(TestObsTable.obsrecord)
@@ -97,15 +97,15 @@ class TestObsTable():
         result.append(TestObsTable.obstable.length)
         result.append(TestObsTable.obstable.records)
         assert_list_equal(result, expected_result)
-    
+
     def test_select_records_from_table(self):
         pass
-    
+
     def test_print_table(self):
         import sys
-        from StringIO import StringIO
+        from io import StringIO
         saved_stdout = sys.stdout
-        
+
         expected_result = "%s\n%s\n%s\n" % (TestObsTable.obstable.titlebar,TestObsTable.asciiline,TestObsTable.asciiline)
         try:
             out = StringIO()
@@ -116,7 +116,7 @@ class TestObsTable():
             assert_equal(result, expected_result)
         finally:
             sys.stdout = saved_stdout
-    
+
     def test_read_table1(self):
         expected_result = [TestObsTable.obsrecord,TestObsTable.obsrecord]
         TestObsTable.obstable.filename = TestObsTable.filename
@@ -132,7 +132,7 @@ class TestObsTable():
         obstable2.read_table()
         result = obstable2.records
         assert_list_equal(result, expected_result)
-    
+
     def test_write_table1(self):
         # Test file exist when clobber False
         TestObsTable.obstable.add_records_to_table([TestObsTable.obsrecord,TestObsTable.obsrecord])
@@ -155,12 +155,6 @@ class TestObsTable():
         expected_result = open(TestObsTable.pretty, 'r').read()
         result = open(TestObsTable.filename, 'r').read()
         assert_multi_line_equal(result, expected_result)
-    
-    
+
     def test_append_table(self):
         pass
-
-    
-    
-    
-    

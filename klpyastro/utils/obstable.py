@@ -2,6 +2,7 @@
 """
 Table access Classes
 """
+from __future__ import print_function
 
 # pylint: disable=C0301
 # Targetname rootname  band grism  datatype applyto     filerange exptime LNRS rdmode
@@ -17,7 +18,7 @@ class ObsTable:
     Represents an observations summary table.  Create or extend
     an observations summary table.  The object can be created empty
     with the information like file name and records added later.
-    
+
     :param filename: File name of the table.  If the file does not
         exist, create it.  [Default: None]
     :type filename: str
@@ -25,45 +26,45 @@ class ObsTable:
         information for one line of the table.  [Default: None]
     :type records: ObsRecords
     """
-    
+
     def __init__(self, filename=None, records=None):
         self.records = []
         self.add_records_to_table(records)
         self.length = len(self.records)
         self.filename = ObsTable.validate_filename(filename)
-        if self.filename != None:
+        if self.filename is not None:
             self.read_table(self.filename)
         self.titlebar = "# %s\t\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % \
             ('Targetname','rootname', 'band', 'grism', 'datatype', 'applyto',
             'filerange', 'exptime', 'LNRS', 'rdmode')
-        return        
-        
+        return
+
     @classmethod
     def validate_filename(cls, filename):
         """
         Runs checks on file and returns the filename if everything
         checks out.
         WARNING: It doesn't do any checks right now.
-        
+
         :param filename: File name of the table.
         :type filename: str
         :rtype: str
         """
-        # TODO: add some file checking.  
-        #       does it exists? if it does, is it a file? 
+        # TODO: add some file checking.
+        #       does it exists? if it does, is it a file?
         #       Can it be open for reading?
         return filename
-    
+
     def add_records_to_table(self, records):
         """
-        Add a record (type ObsRecord) or a list of records (type list) 
+        Add a record (type ObsRecord) or a list of records (type list)
         to the table.
-        
+
         :param records: Record to add to the table.  Each record
             is one line in the table.
         :type records: ObsRecord or list of ObsRecord
         """
-        
+
         if isinstance(records, list):
             self.records.extend(records)
         elif isinstance(records, ObsRecord):
@@ -72,7 +73,7 @@ class ObsTable:
             pass
         else:
             raise RuntimeError
-        self.length = len(self.records)           
+        self.length = len(self.records)
         return
 
 #    def select_records_from_table(self, criteria):
@@ -89,30 +90,30 @@ class ObsTable:
 #        #
 #        selected_records = []
 #        return selected_records
-    
+
     def print_table(self):
         """
         Print formatted table to the screen.
         """
-        print self.titlebar
+        print(unicode(self.titlebar, 'utf-8'))
         for record in self.records:
-            print record.print_record()
+            print(unicode(record.print_record(),'utf-8'))
         return
-    
+
     def read_table(self, filename=None):
         """
         Read table from file on disk.
-        
+
         :param filename: Name of the file to read.  If filename is None,
             then the instance's filename attribute must be defined.
         :type filename: str
         """
-        
+
         if filename is None and self.filename is None:
             raise ValueError
         elif filename is None:
             filename = self.filename
-            
+
         try:
             with open(filename, 'r') as table:
                 # reset the instance.
@@ -126,7 +127,7 @@ class ObsTable:
                         record.read_record(line)
                         self.add_records_to_table(record)
                     except ValueError:
-                        #probably the title bar  
+                        #probably the title bar
                         # (pretty format doesn't start with #)
                         continue
         except IOError:
@@ -134,21 +135,21 @@ class ObsTable:
         table.close()
 
         return
-    
+
     def write_table(self, filename=None, clobber=True):
         """
         Write table to file on disk.
-        
+
         :param filename: Name of the file to write to.  If filename is
             None, then the instance's filename attribute must be set.
         :type filename: str
         :param clobber: Set whether the file can be overwritten or not.
             [Default: True]
         :type clobber: bool
-        
+
         """
         import os
-        
+
         if filename is None and self.filename is None:
             raise IOError
         elif filename is None:
@@ -156,8 +157,8 @@ class ObsTable:
 
         try:
             if os.path.exists(filename) and clobber==False:
-                print "Error: File exists (%s) and overwrite not allowed\n" % \
-                    filename
+                print("Error: File exists (%s) and overwrite not allowed\n" %
+                      filename)
                 raise IOError
             with open(filename, 'w') as table:
                 table.write(self.titlebar)
@@ -170,13 +171,13 @@ class ObsTable:
         table.close()
 
         return
-    
+
 #    def append_table(self, filename=None):
-#        # use case:  file on disk.  ObsTable contains all new records.  
+#        # use case:  file on disk.  ObsTable contains all new records.
 #        # Append new records.
 #        # no checks whether there are duplication.  keep it simple for now.
-#        # Not sure if I really need this.  Probably easier to have the whole 
-#        # table in memory in the ObsTable.  It's easy enough to merge the 
+#        # Not sure if I really need this.  Probably easier to have the whole
+#        # table in memory in the ObsTable.  It's easy enough to merge the
 #        # records if I have two ObsTable.
 #        return
 
@@ -192,8 +193,8 @@ class ObsTable:
         """
         from astropy.io import ascii
         table = ascii.read(self.filename)
-        ascii.write(table, output=self.filename, 
-                    Writer=ascii.FixedWidth, bookend=False, 
+        ascii.write(table, output=self.filename,
+                    Writer=ascii.FixedWidth, bookend=False,
                     delimiter=None)
         return
 
@@ -202,7 +203,7 @@ class ObsRecord:
     """
     Record that contains all the information needed for one line
     of the observation summary table.
-    
+
     :param targetname: Name of the target. 'Targetname' column.
     :type targetname: str
     :param rootname: Root name for the dataset. 'rootname' column. Eg. S200130719.
@@ -222,16 +223,16 @@ class ObsRecord:
     :type filerange: str
     :param exptime: Exposure time. 'exptime' column.
     :type exptime: float or str
-    :param lnrs: Number of non-destructive read pairs from headers.  Note 
-        that at this time the true number is LNRS_header+2 for LNRS>1.  
-        For the table, all that matters is that the LNRS matches so the 
+    :param lnrs: Number of non-destructive read pairs from headers.  Note
+        that at this time the true number is LNRS_header+2 for LNRS>1.
+        For the table, all that matters is that the LNRS matches so the
         erroneous value from the header will do. 'LNRS' column.
     :type lnrs: int or str
     :param rdmode: Read mode.  'rdmode' column.  Eg. faint, bright, medium(?)
     :type rdmode: str
     """
     # pylint: disable=R0913
-    def __init__(self, targetname=None, rootname=None, band=None, grism=None, 
+    def __init__(self, targetname=None, rootname=None, band=None, grism=None,
                  datatype=None, applyto=None, filerange=None, exptime=None,
                  lnrs=None, rdmode=None):
         self.targetname = targetname
@@ -246,59 +247,77 @@ class ObsRecord:
         self.rdmode = rdmode
         return
     # pylint: enable=R0913
-    
-    def __cmp__(self, other):
+
+    # # I think this is used by the asserts in the nose test suite.
+    # # The tests might need to be rewritten for python 3 since __cmp__ is
+    # # not allowed.  I would need to replace with __eq__ and add a __lt__,
+    # # I believe.  Then instead of cmp(a, b) do (a > b) - (a < b)
+    # def __cmp__(self, other):
+    #     assert isinstance(other, ObsRecord)
+    #     return cmp((self.targetname, self.rootname, self.band,
+    #                 self.grism, self.datatype, self.applyto,
+    #                 self.filerange, self.exptime, self.lnrs,
+    #                 self.rdmode),
+    #                (other.targetname, other.rootname, other.band,
+    #                 other.grism, other.datatype, other.applyto,
+    #                 other.filerange, other.exptime, other.lnrs,
+    #                 other.rdmode))
+
+    def __eq__(self, other):
         assert isinstance(other, ObsRecord)
-        return cmp((self.targetname, self.rootname, self.band,
-                    self.grism, self.datatype, self.applyto,
-                    self.filerange, self.exptime, self.lnrs,
-                    self.rdmode),
-                   (other.targetname, other.rootname, other.band,
-                    other.grism, other.datatype, other.applyto,
-                    other.filerange, other.exptime, other.lnrs,
-                    other.rdmode))
+        return self.targetname == other.targetname and \
+               self.rootname == other.rootname and \
+               self.band == other.band and \
+               self.grism == other.grism and \
+               self.datatype == other.datatype and \
+               self.applyto == other.applyto and \
+               self.filerange == other.filerange and \
+               self.exptime == other.exptime and \
+               self.lnrs == other.lnrs and \
+               self.rdmode == other.rdmode
+
 
     def print_record(self):
         """
         Convert a record to a formatted string that can then be
         printed to screen or sent to file.
-        
+
         :rtype: str
         """
-        
-        # TODO: print_record will fail if one of the attribute is 
+
+        # TODO: print_record will fail if one of the attribute is
         # TODO: set to None.  Add checks.
         record_string = "%s\t%s\t%s\t%s\t%s\t\t%s\t%s\t\t%.1f\t%d\t%s" % \
-            (self.targetname,
-            self.rootname,
-            self.band,
-            self.grism,
-            self.datatype,
-            self.applyto,
-            self.filerange,
-            self.exptime,
-            self.lnrs,
-            self.rdmode)
+                        (self.targetname,
+                         self.rootname,
+                         self.band,
+                         self.grism,
+                         self.datatype,
+                         self.applyto,
+                         self.filerange,
+                         self.exptime,
+                         self.lnrs,
+                         self.rdmode)
         return record_string
-    
+
     def read_record(self, line):
         """
         Parse an ascii representation of a record.  The string is a line
         from the table on disk.
-        
+
         :param line: A line from the table on disk.
         :type line: str
         """
-        
+
         (self.targetname, self.rootname,
          self.band, self.grism,
          self.datatype, self.applyto,
          self.filerange, self.exptime,
          self.lnrs, self.rdmode) = line.split()
-        
+
         self.exptime = float(self.exptime)
         self.lnrs = int(self.lnrs)
-         
+
         return
 # pylint: enable:R0902
 
