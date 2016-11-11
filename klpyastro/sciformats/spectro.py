@@ -225,6 +225,7 @@ class Line(object):
         assert self.obswlen == (self.redshift + 1) * self.restwlen
 
 
+# TODO: Does not work with new astrodata single FITS because can't get hdu.
 class Spectrum(object):
     """
     Class representing a spectrum.

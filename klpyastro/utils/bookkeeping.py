@@ -90,9 +90,10 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
     """
     from klpyastro.utils import obstable
     import os.path
-    # TODO: change to new astrodata when ready
+
     if auto:
-        from astrodata import AstroData
+        import astrodata
+        import gemini_instruments
 
     # Create an ObsTable.  If the file already exists on disk,
     # then read it.  Otherwise, leave it empty.
@@ -157,7 +158,7 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
                         filename = os.path.join(rawdir, filename)
 
                         # open ad
-                        ad = AstroData(filename)
+                        ad = astrodata.open(filename)
                         filename_not_known = False
             else:
 
@@ -166,7 +167,8 @@ def mktable_helper(tablename, auto=True, rawdir="./"):
                 user_inputs[input_request['id']] = input_value
 
         if auto:
-            ad.close()
+            # ad.close()
+            del ad
 
         # Create record
         new_record = create_record(user_inputs)
@@ -264,12 +266,12 @@ def query_header(ad, requested_input):
     # might have to change to if-elif sequence.  (but it's kinda cool
     # looking this way.)
     return {
-        'targetname' : ad.object().as_str(),
-        'band'       : ad.filter_name(pretty=True).as_str(),
-        'grism'      : ad.disperser(pretty=True).as_str(),
-        'exptime'    : ad.exposure_time().as_float(),
-        'lnrs'       : ad.phu_get_key_value('LNRS'),
-        'rdmode'     : ad.read_mode(pretty=True).as_str()
+        'targetname' : ad.object(),
+        'band'       : ad.filter_name(pretty=True),
+        'grism'      : ad.disperser(pretty=True),
+        'exptime'    : ad.exposure_time(),
+        'lnrs'       : ad.phu.LNRS,
+        'rdmode'     : ad.read_mode()
     }[requested_input]
 
 def create_record(user_inputs):

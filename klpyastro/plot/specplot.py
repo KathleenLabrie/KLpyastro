@@ -231,30 +231,29 @@ class SpecPlotAnnotations(object):
         self.title = title
         return
 
-# TODO: reactivate once the new astrodata is available for Python 3
-# def example():
-#     """
-#     This is just an example.  Cut and paste that on the python prompt.
-#     It can also be run as specplot.example().
-#     """
-#     # import numpy as np
-#     import matplotlib.pyplot as plt
-#     from astropy import wcs
-#     from astrodata import AstroData
-#
-#     ad = AstroData('JHK.fits')
-#     x_values = np.arange(ad.get_key_value('NAXIS1'))
-#
-#     wcs_ad = wcs.WCS(ad.header.tostring())
-#     wlen = wcs_ad.wcs_pix2world(zip(x_values), 0)
-#
-#     plt.plot(wlen, ad.data)
-#     plt.xlabel('Wavelength [Angstrom]')
-#     plt.ylabel('Counts')
-#     plt.axis('tight')
-#     plt.ylim(-100, 800)
-#     plt.show()
-#
-#     ad.close()
-#
-#     # plt.axis[[-100,1000,ymin,ymax]]
+def example():
+    """
+    This is just an example.  Cut and paste that on the python prompt.
+    It can also be run as specplot.example().
+    """
+    # import numpy as np
+    import matplotlib.pyplot as plt
+    from astropy import wcs
+    from astropy.io import fits
+
+    hdulist = fits.open('JHK.fits')
+    x_values = np.arange(hdulist[0].header['NAXIS1'])
+
+    wcs_hdu = wcs.WCS(hdulist[0].header)
+    wlen = wcs_hdu.wcs_pix2world(zip(x_values), 0)
+
+    plt.plot(wlen, hdulist[0].data)
+    plt.xlabel('Wavelength [Angstrom]')
+    plt.ylabel('Counts')
+    plt.axis('tight')
+    plt.ylim(-100, 800)
+    plt.show()
+
+    hdulist.close()
+
+    # plt.axis[[-100,1000,ymin,ymax]]

@@ -3,7 +3,9 @@ import os.path
 from klpyastro.utils import bookkeeping
 from nose.tools import assert_list_equal
 from nose.tools import assert_dict_equal
-from astrodata import AstroData
+import astrodata
+import gemini_instruments
+
 
 class TestBookkeeping:
 
@@ -32,7 +34,7 @@ class TestBookkeeping:
                             'lnrs': 6,
                             'rdmode': '6'
                            }
-        ad = AstroData(TestBookkeeping.f2sciencefile)
+        ad = astrodata.open(TestBookkeeping.f2sciencefile)
         result = {}
         #result['targetname'] = bookkeeping.query_header(ad, 'targetname')
         result['band'] = bookkeeping.query_header(ad, 'band')
@@ -49,7 +51,7 @@ class TestBookkeeping:
                             'lnrs': 1,
                             'rdmode': '1'
                            }
-        ad = AstroData(TestBookkeeping.f2darkfile)
+        ad = astrodata.open(TestBookkeeping.f2darkfile)
         result = {}
         result['band'] = bookkeeping.query_header(ad, 'band')
         result['grism'] = bookkeeping.query_header(ad, 'grism')
@@ -65,7 +67,7 @@ class TestBookkeeping:
                             'lnrs': 1,
                             'rdmode': '1'
                            }
-        ad = AstroData(TestBookkeeping.f2flatfile)
+        ad = astrodata.open(TestBookkeeping.f2flatfile)
         result = {}
         result['band'] = bookkeeping.query_header(ad, 'band')
         result['grism'] = bookkeeping.query_header(ad, 'grism')
@@ -81,7 +83,7 @@ class TestBookkeeping:
                             'lnrs': 6,
                             'rdmode': '6'
                            }
-        ad = AstroData(TestBookkeeping.f2arcfile)
+        ad = astrodata.open(TestBookkeeping.f2arcfile)
         result = {}
         result['band'] = bookkeeping.query_header(ad, 'band')
         result['grism'] = bookkeeping.query_header(ad, 'grism')

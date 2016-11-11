@@ -1,15 +1,17 @@
-import klpyastro
-from klpyastro.sciformats import spectro
+import os.path
+import numpy as np
 from astropy import units as u
-from astrodata import AstroData
 from astropy.io import fits as pf
 from nose.tools import assert_equal
 from nose.tools import assert_list_equal
 from nose.tools import assert_almost_equal
 from numpy.testing import assert_array_equal
-import numpy as np
-import os.path
 
+import astrodata
+import gemini_instruments
+
+import klpyastro
+from klpyastro.sciformats import spectro
 
 class TestLine:
 
@@ -224,13 +226,16 @@ class TestSpectrum:
         pass
 
     def setup(self):
-        TestSpectrum.ad = AstroData(TestSpectrum.testfile)
-        TestSpectrum.adhdu = TestSpectrum.ad['SCI', 1]
+        TestSpectrum.ad = astrodata.open(TestSpectrum.testfile)
+        # TODO: make sure this works with single FITS.
+        # This to_hdulist doesn't work because single FITS are not
+        # yet properly supported in the new astrodata.
+        TestSpectrum.adhdu = TestSpectrum.ad._dataprov.to_hdulist()[0]
         TestSpectrum.apf = pf.open(TestSpectrum.testfile)
         TestSpectrum.apfhdu = TestSpectrum.apf[0]
 
     def teardown(self):
-        TestSpectrum.ad.close()
+        del TestSpectrum.ad
         TestSpectrum.apf.close()
 
     def test_get_counts_array_from_hdu1(self):
@@ -242,13 +247,13 @@ class TestSpectrum:
 
     def test_get_counts_array_from_hdu2(self):
         # test passing an astropy hdu
-        expected_result = TestSpectrum.adhdu.data
+        expected_result = TestSpectrum.apfhdu.data
         sp = spectro.Spectrum(TestSpectrum.apfhdu, wunit=u.Angstrom)
         result = sp.counts
         assert_array_equal(result, expected_result)
 
     def test_get_pixel_array_from_hdu1(self):
-        expected_result = np.arange(TestSpectrum.apfhdu.header['NAXIS1'])
+        expected_result = np.arange(TestSpectrum.aphdu.header['NAXIS1'])
         sp = spectro.Spectrum(TestSpectrum.adhdu, wunit=u.Angstrom)
         result = sp.pix
         assert_array_equal(result, expected_result)
@@ -285,7 +290,7 @@ class TestSpectrum:
 
     def test_apply_wcs_to_pixels(self):
         expected_result = [9719.456, 16292.345, 24981.703]
-        sp = spectro.Spectrum(TestSpectrum.adhdu)
+        sp = spectro.Spectrum(TestSpectrum.apfhdu)
         result = [sp.wlen[0], sp.wlen[1000], sp.wlen[-1]]
         assert_almost_equal(result[0], expected_result[0], 3)
         assert_almost_equal(result[1], expected_result[1], 3)
