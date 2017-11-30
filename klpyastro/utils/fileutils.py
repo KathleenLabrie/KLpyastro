@@ -5,8 +5,8 @@ import re
 def cat(inputstring, outfile=None):
     if '>' in inputstring:
         (inputstring, outfile) = inputstring.split('>')
-        inputstring.strip()
-        outfile.strip()
+        inputstring = inputstring.strip()
+        outfile = outfile.strip()
     else:
         if outfile is None:
             raise ValueError
@@ -169,7 +169,7 @@ def atglobparser(inputstring):
 
     # split input string on commas
     #input_elements = [s.strip() for s in inputstring.split(',')]
-    input_elements = list(filter(None, re.split(r'(,|\s)', inputstring)))
+    input_elements = list(filter(None, re.split(r',|\s', inputstring)))
 
     filelist = []
     for element in input_elements:
