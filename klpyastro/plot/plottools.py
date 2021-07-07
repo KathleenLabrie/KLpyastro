@@ -144,3 +144,106 @@ class SpPlot(Plot):
         """
         self.fig.savefig(output_name)
         return
+
+
+class MultiPlot(object):
+    def __init__(self, nrows=1, ncols=1, title=None):
+        self.nrows = nrows
+        self.ncols = ncols
+        if title is not None:
+            self.title = title
+        self.plots_titles = None
+        self.plots_labels = None
+        self.plots_data = None
+        self.pdf = None
+
+    def add_data(self, plots_data, plots_labels=None):
+        """
+
+        Parameters
+        ----------
+        plot_data : list of tuple
+            tuples of x and y data, one tuple per plot
+
+        """
+        self.plots_data = plots_data
+        if plots_labels is not None:
+            self.add_labels(plots_labels)
+
+    def add_labels(self, plots_labels):
+        self.plots_labels = plots_labels
+
+    def add_titles(self, plots_titles):
+        self.plots_titles = plots_titles
+
+    def set_size(self, width, height):
+        self.width = width
+        self.height = height
+
+    def plot(self, png=False, filename='multiplot.png', pdf=None):
+        self.fig, self.axs = plt.subplots(self.nrows, self.ncols)
+        self.fig.suptitle(self.title)
+        self.fig.set_size_inches(self.width, self.height)
+
+        nplots = len(self.plots_data)
+        plotid = 0
+        for axrow in self.axs:
+            for ax in axrow:
+                xlabel = None
+                ylabel = None
+                title = None
+
+                if plotid == nplots:
+                    break   # fewer plots then slots
+
+                x = self.plots_data[plotid][0]
+                y = self.plots_data[plotid][1]
+                if len(self.plots_labels) == 1:
+                    xlabel = self.plots_labels[0][0]
+                    ylabel = self.plots_labels[0][1]
+                elif self.plots_labels is not None:
+                    xlabel = self.plots_labels[plotid][0]
+                    ylabel = self.plots_labels[plotid][1]
+                if self.plots_titles is not None:
+                    title = self.plots_titles[plotid]
+
+                ax.plot(x, y)
+                ax.set_title(title)
+                ax.set(xlabel=xlabel, ylabel=ylabel)
+                plotid += 1
+
+        self.fig.tight_layout(rect=[0, 0.03, 1, 0.95])
+
+        if pdf:
+            pdf.savefig()
+
+        if png:
+            plt.savefig(filename)
+        else:
+            plt.show()
+
+    def save_plot(self, filename='multiplot.png'):
+        self.plot(save=True, filename=filename)
+
+    def close(self):
+        plt.close()
+
+
+
+
+"""
+import plottools
+from importlib import reload
+import numpy as np
+
+x = np.linspace(0, 2 * np.pi, 400)
+y = np.sin(x ** 2)
+
+m = plottools.MultiPlot(2,2,'test')
+plot_data = [(x,y), (x,-y), (-x, y), (-x, -y)]
+plot_labels = [('x axis', 'y axis'),('x axis', '-y axis'),('-x axis', 'y axis'),('-x axis', '-y axis')]
+
+m.add_data(plot_data, plot_labels)
+m.plot()
+
+"""
